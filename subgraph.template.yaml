@@ -18,7 +18,7 @@ dataSources:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/mapping/pollenDAO.ts
+      file: ./src/mappings/pollenDao.ts
       entities:
         - User
         - Asset
@@ -47,7 +47,7 @@ dataSources:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/mapping/portfolio.ts
+      file: ./src/mappings/portfolio.ts
       entities:
         - User
         - Asset
@@ -76,7 +76,7 @@ dataSources:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/mapping/proposals.ts
+      file: ./src/mappings/proposals.ts
       entities:
         - User
         - Asset
@@ -101,7 +101,7 @@ dataSources:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/mapping/quoter.ts
+      file: ./src/mappings/quoter.ts
       entities:
         - User
         - Asset
@@ -128,7 +128,7 @@ dataSources:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/mapping/voting.ts
+      file: ./src/mappings/voting.ts
       entities:
         - User
         - Asset
