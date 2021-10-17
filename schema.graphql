@@ -1,0 +1,19 @@
+type User @entity {
+    id: ID!
+}
+
+type Asset @entity {
+    id: ID!
+}
+
+type AssetBalance @entity {
+    id: ID!
+}
+
+type Portfolio @entity {
+    id: ID!
+}
+
+type PollenToken @entity {
+    id: ID!
+}

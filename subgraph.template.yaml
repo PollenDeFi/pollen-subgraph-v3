@@ -1,0 +1,145 @@
+specVersion: 0.0.2
+description: Pollen is next generation community powered asset management platform
+repository: https://github.com/PollenDeFi/pollen-subgraph-v3
+
+schema:
+  file: ./schema.graphql
+
+dataSources:
+
+  - kind: ethereum/contract
+    name: PollenDAO
+    network: {{network}}
+    source:
+      address: "{{pollenDAO}}"
+      abi: PollenDAO
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/PollenDAO.ts
+      entities:
+        - User
+        - Asset
+        - AssetBalance
+        - Portfolio
+        - PollenToken
+      abis:
+        - name: PollenDAO
+          file: ./abis/PollenDAO/PollenDAO.sol/PollenDAO.json
+      eventHandlers:
+        - event: ModuleAdded(indexed address)
+          handler: handleModuleAdded
+        - event: ModuleUpdated(indexed address,address)
+          handler: handleModuleUpdated
+        - event: PollenTokenSet(indexed address)
+          handler: handlePollenTokenSet
+
+  - kind: ethereum/contract
+    name: Portfolio
+    network: {{network}}
+    source:
+      address: "{{pollenDAO}}"
+      abi: Portfolio
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/Portfolio.ts
+      entities:
+        - User
+        - Asset
+        - AssetBalance
+        - Portfolio
+        - PollenToken
+      abis:
+        - name: Portfolio
+          file: ./abis/PollenDAO/Modules/portfolio/Portfolio.sol/Portfolio.json
+      eventHandlers:
+        - event: AssetAdded(indexed address)
+          handler: handleAssetAdded
+        - event: AssetRemoved(indexed address)
+          handler: handleAssetRemoved
+        - event: PortfolioCreated(indexed address)
+          handler: handlePortfolioCreated
+
+  - kind: ethereum/contract
+    name: Proposals
+    network: {{network}}
+    source:
+      address: "{{pollenDAO}}"
+      abi: Proposals
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/Proposals.ts
+      entities:
+        - User
+        - Asset
+        - AssetBalance
+        - Portfolio
+        - PollenToken
+      abis:
+        - name: Proposals
+          file: ./abis/PollenDAO/Modules/proposals/Proposals.sol/Proposals.json
+      eventHandlers:
+        - event: Submitted(indexed uint256,uint8,indexed address)
+          handler: handleSubmitted
+
+  - kind: ethereum/contract
+    name: Quoter
+    network: {{network}}
+    source:
+      address: "{{pollenDAO}}"
+      abi: Quoter
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/Quoter.ts
+      entities:
+        - User
+        - Asset
+        - AssetBalance
+        - Portfolio
+        - PollenToken
+      abis:
+        - name: Quoter
+          file: ./abis/PollenDAO/Modules/quoter/Quoter.sol/Quoter.json
+      eventHandlers:
+        - event: PriceFeedAdded(indexed address,address,uint8)
+          handler: handlePriceFeedAdded
+        - event: PriceFeedRemoved(indexed address,uint8)
+          handler: handlePriceFeedRemoved
+
+  - kind: ethereum/contract
+    name: Voting
+    network: {{network}}
+    source:
+      address: "{{pollenDAO}}"
+      abi: Voting
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/Voting.ts
+      entities:
+        - User
+        - Asset
+        - AssetBalance
+        - Portfolio
+        - PollenToken
+      abis:
+        - name: Voting
+          file: ./abis/PollenDAO/Modules/voting/Voting.sol/Voting.json
+      eventHandlers:
+        - event: VoteCast(indexed uint256,indexed bool,indexed uint256)
+          handler: handleVoteCast
+        - event: VotingTermsSwitched(indexed uint256,bool)
+          handler: handleVotingTermsSwitched
