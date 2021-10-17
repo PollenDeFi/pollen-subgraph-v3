@@ -1,0 +1,19 @@
+{
+  "name": "pollen-subgraph-v3",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
+    "prepare:ropsten": "mustache config/ropsten.json subgraph.template.yaml > subgraph.yaml",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ PollenDeFi/pollen-subgraph-v3",
+    "create-local": "graph create --node http://localhost:8020/ PollenDeFi/pollen-subgraph-v3",
+    "remove-local": "graph remove --node http://localhost:8020/ PollenDeFi/pollen-subgraph-v3",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 PollenDeFi/pollen-subgraph-v3"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.22.3",
+    "@graphprotocol/graph-ts": "0.22.1",
+    "mustache": "^4.2.0"
+  }
+}
