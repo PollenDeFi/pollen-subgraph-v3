@@ -1,19 +1,36 @@
 type User @entity {
-    id: ID!
+  id: ID!
+  rebalances: [PortfolioRebalance!]!
+  currentPortfolio: Portfolio
 }
 
 type Asset @entity {
-    id: ID!
+  id: ID!
+  name: String!
+  symbol: String!
+  decimals: Int!
 }
 
 type AssetBalance @entity {
-    id: ID!
+  id: ID!
+  asset: Asset!
+  amount: BigInt!
 }
 
 type Portfolio @entity {
-    id: ID!
+  id: ID!
+  owner: User!
+  assetBalances: [AssetBalance!]!
 }
 
 type PollenToken @entity {
-    id: ID!
+  id: ID!
+  asset: Asset!
+  supply: BigInt!
+}
+
+type PortfolioRebalance @entity {
+  id: ID!
+  timestamp: BigInt!
+  portfolio: Portfolio!
 }
