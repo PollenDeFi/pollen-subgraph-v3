@@ -2,6 +2,7 @@ type User @entity {
   id: ID!
   rebalances: [PortfolioRebalance!]!
   currentPortfolio: Portfolio
+  stats: UserStat!
 }
 
 type Asset @entity {
@@ -33,4 +34,17 @@ type PortfolioRebalance @entity {
   id: ID!
   timestamp: BigInt!
   portfolio: Portfolio!
+}
+
+type Delegation @entity {
+  id: ID!
+  delegator: User!
+  delegatee: User!
+  amount: BigInt!
+}
+
+type UserStat @entity {
+  id: ID!
+  totalDelegatedTo: BigInt!
+  totalDelegatedFrom: BigInt!
 }

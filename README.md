@@ -2,7 +2,7 @@
 
 # Pollen Subgraph V3
 
-A graphql based data layer for querying the Pollen DAO.
+A graphql based data layer for querying the Pollen DAO contract state.
 
 URL: _Coming soon_
 
@@ -12,9 +12,9 @@ URL: _Coming soon_
 
 ### Development
 
-- Run the `npm run prepare:[network]` to prepare yaml file from template.yaml and network specific data.
-- Run the `npm run codegen` command to prepare the TypeScript sources for the GraphQL (generated/schema) and the ABIs (generated/[ABI]/\*)
-- [Optional] run the `npm run build` command to build the subgraph. Can be used to check compile errors before deploying.
+- Run `npm run prepare:[network]` to prepare yaml file from template.yaml and network specific data.
+- Run `npm run codegen` to prepare the TypeScript sources for the GraphQL (generated/schema) and the ABIs (generated/[ABI]/\*)
+- [Optional] run `npm run build` to build the subgraph. Can be used to check compile errors before deploying.
 
 ### Deploy
 
