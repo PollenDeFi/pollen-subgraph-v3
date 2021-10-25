@@ -8,9 +8,9 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: PollenDAO
-    network: '{{network}}'
+    network: {{ network }}
     source:
-      address: '{{pollenDAO}}'
+      address: '{{ pollenDAO }}'
       abi: PollenDAO
       startBlock: {{ startBlock }}
     mapping:
@@ -36,10 +36,39 @@ dataSources:
           handler: handlePollenTokenSet
 
   - kind: ethereum/contract
-    name: Quoter
-    network: '{{network}}'
+    name: Portfolio
+    network: {{network}}
     source:
-      address: '{{pollenDAO}}'
+      address: '{{ pollenDAO }}'
+      abi: Portfolio
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/mappings/portfolio.ts
+      entities:
+        - User
+        - Asset
+        - AssetBalance
+        - Portfolio
+        - PollenToken
+      abis:
+        - name: Portfolio
+          file: ./abis/PollenDAO/Modules/portfolio/Portfolio.sol/Portfolio.json
+      eventHandlers:
+        - event: AssetAdded(indexed address)
+          handler: handleAssetAdded
+        - event: AssetRemoved(indexed address)
+          handler: handleAssetRemoved
+        - event: PortfolioCreated(indexed address)
+          handler: handlePortfolioCreated
+
+  - kind: ethereum/contract
+    name: Quoter
+    network: {{ network }}
+    source:
+      address: '{{ pollenDAO }}'
       abi: Quoter
       startBlock: {{ startBlock }}
     mapping:

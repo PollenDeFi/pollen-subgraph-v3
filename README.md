@@ -2,7 +2,7 @@
 
 # Pollen Subgraph V3
 
-A graphql based data layer for querying the Pollen DAO contract state.
+A graphql based data layer for querying Pollen DAO's contract state.
 
 URL: _Coming soon_
 
