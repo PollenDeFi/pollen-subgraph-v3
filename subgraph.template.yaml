@@ -6,14 +6,13 @@ schema:
   file: ./schema.graphql
 
 dataSources:
-
   - kind: ethereum/contract
     name: PollenDAO
-    network: {{network}}
+    network: {{ network }}
     source:
-      address: "{{pollenDAO}}"
+      address: '{{ pollenDAO }}'
       abi: PollenDAO
-      startBlock: {{startBlock}}
+      startBlock: {{ startBlock }}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -40,9 +39,9 @@ dataSources:
     name: Portfolio
     network: {{network}}
     source:
-      address: "{{pollenDAO}}"
+      address: '{{ pollenDAO }}'
       abi: Portfolio
-      startBlock: {{startBlock}}
+      startBlock: {{ startBlock }}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -66,37 +65,12 @@ dataSources:
           handler: handlePortfolioCreated
 
   - kind: ethereum/contract
-    name: Proposals
-    network: {{network}}
-    source:
-      address: "{{pollenDAO}}"
-      abi: Proposals
-      startBlock: {{startBlock}}
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      file: ./src/mappings/proposals.ts
-      entities:
-        - User
-        - Asset
-        - AssetBalance
-        - Portfolio
-        - PollenToken
-      abis:
-        - name: Proposals
-          file: ./abis/PollenDAO/Modules/proposals/Proposals.sol/Proposals.json
-      eventHandlers:
-        - event: Submitted(indexed uint256,uint8,indexed address)
-          handler: handleSubmitted
-
-  - kind: ethereum/contract
     name: Quoter
-    network: {{network}}
+    network: {{ network }}
     source:
-      address: "{{pollenDAO}}"
+      address: '{{ pollenDAO }}'
       abi: Quoter
-      startBlock: {{startBlock}}
+      startBlock: {{ startBlock }}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -108,6 +82,7 @@ dataSources:
         - AssetBalance
         - Portfolio
         - PollenToken
+        - PortfolioRebalance
       abis:
         - name: Quoter
           file: ./abis/PollenDAO/Modules/quoter/Quoter.sol/Quoter.json
@@ -116,30 +91,3 @@ dataSources:
           handler: handlePriceFeedAdded
         - event: PriceFeedRemoved(indexed address,uint8)
           handler: handlePriceFeedRemoved
-
-  - kind: ethereum/contract
-    name: Voting
-    network: {{network}}
-    source:
-      address: "{{pollenDAO}}"
-      abi: Voting
-      startBlock: {{startBlock}}
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      file: ./src/mappings/voting.ts
-      entities:
-        - User
-        - Asset
-        - AssetBalance
-        - Portfolio
-        - PollenToken
-      abis:
-        - name: Voting
-          file: ./abis/PollenDAO/Modules/voting/Voting.sol/Voting.json
-      eventHandlers:
-        - event: VoteCast(indexed uint256,indexed bool,indexed uint256)
-          handler: handleVoteCast
-        - event: VotingTermsSwitched(indexed uint256,bool)
-          handler: handleVotingTermsSwitched

@@ -1,19 +1,52 @@
 type User @entity {
-    id: ID!
+  id: ID!
+  rebalances: [PortfolioRebalance!]! @derivedFrom(field: "user")
+  currentPortfolio: Portfolio
+  stats: UserStat!
 }
 
 type Asset @entity {
-    id: ID!
+  id: ID!
+  name: String!
+  symbol: String!
+  decimals: Int!
 }
 
 type AssetBalance @entity {
-    id: ID!
+  id: ID!
+  asset: Asset!
+  amount: BigInt!
 }
 
 type Portfolio @entity {
-    id: ID!
+  id: ID!
+  owner: User!
+  assetBalances: [AssetBalance!]!
 }
 
 type PollenToken @entity {
-    id: ID!
+  id: ID!
+  asset: Asset!
+  supply: BigInt!
+}
+
+type PortfolioRebalance @entity {
+  id: ID!
+  timestamp: BigInt!
+  portfolio: Portfolio!
+  user: User!
+}
+
+type Delegation @entity {
+  id: ID!
+  delegator: User!
+  delegatee: User!
+  amount: BigInt!
+  token: PollenToken!
+}
+
+type UserStat @entity {
+  id: ID!
+  totalDelegatedTo: BigInt!
+  totalDelegatedFrom: BigInt!
 }
