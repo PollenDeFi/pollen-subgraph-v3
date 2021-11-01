@@ -33,6 +33,25 @@
         "internalType": "address",
         "name": "creator",
         "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "portfolioId",
+        "type": "uint256"
+      }
+    ],
+    "name": "PortfolioClosed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
       }
     ],
     "name": "PortfolioCreated",
@@ -52,6 +71,24 @@
       }
     ],
     "name": "addAsset",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "portfolioId",
+        "type": "uint256"
+      }
+    ],
+    "name": "closePortfolio",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
