@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "VotingModuleStorage",
+  "sourceName": "contracts/PollenDAO/Modules/voting/VotingModuleStorage.sol",
+  "abi": [],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220e9c5552fda3baca2265e39b4a5c091fd1f316655b850a6c60e5284939b0e8e7564736f6c63430008040033",
+  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220e9c5552fda3baca2265e39b4a5c091fd1f316655b850a6c60e5284939b0e8e7564736f6c63430008040033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

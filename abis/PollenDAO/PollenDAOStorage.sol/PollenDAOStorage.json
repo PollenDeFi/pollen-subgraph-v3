@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "PollenDAOStorage",
+  "sourceName": "contracts/PollenDAO/PollenDAOStorage.sol",
+  "abi": [],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea26469706673582212205451c0ca3d7b516e4813074d5da7e3bfd8a0cdd4d41e1636e1c93b89d22de1e564736f6c63430008040033",
+  "deployedBytecode": "0x6080604052600080fdfea26469706673582212205451c0ca3d7b516e4813074d5da7e3bfd8a0cdd4d41e1636e1c93b89d22de1e564736f6c63430008040033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

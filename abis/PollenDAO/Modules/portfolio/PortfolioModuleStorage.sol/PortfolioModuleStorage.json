@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "PortfolioModuleStorage",
+  "sourceName": "contracts/PollenDAO/Modules/portfolio/PortfolioModuleStorage.sol",
+  "abi": [],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220c45cf5c37294b415f747004189c2c320d4753a581b3c01a59d30a1eff71ba23464736f6c63430008040033",
+  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220c45cf5c37294b415f747004189c2c320d4753a581b3c01a59d30a1eff71ba23464736f6c63430008040033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
