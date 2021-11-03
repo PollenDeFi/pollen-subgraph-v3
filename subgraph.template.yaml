@@ -69,7 +69,7 @@ dataSources:
           handler: handleAssetAdded
         - event: AssetRemoved(indexed address)
           handler: handleAssetRemoved
-        - event: PortfolioCreated(indexed address, indexed uint256)
+        - event: PortfolioCreated(indexed address,indexed uint256)
           handler: handlePortfolioCreated
         - event: PortfolioClosed(indexed address,indexed uint256)
           handler: handlePortfolioCreated
@@ -110,7 +110,7 @@ dataSources:
     network: {{ network }}
     source:
       address: '{{ pollenDAO }}'
-      abi: event
+      abi: Delegation
       startBlock: {{ startBlock }}
     mapping:
       kind: ethereum/events
