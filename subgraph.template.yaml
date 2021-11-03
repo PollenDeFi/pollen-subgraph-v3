@@ -19,11 +19,15 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/pollenDao.ts
       entities:
+        # unlink entities which are not used after wiriting mappings
         - User
         - Asset
         - AssetBalance
         - Portfolio
         - PollenToken
+        - PortfolioRebalance
+        - Delegation
+        - UserStat
       abis:
         - name: PollenDAO
           file: ./abis/PollenDAO/PollenDAO.sol/PollenDAO.json
@@ -48,11 +52,15 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/portfolio.ts
       entities:
+        # unlink entities which are not used after wiriting mappings
         - User
         - Asset
         - AssetBalance
         - Portfolio
         - PollenToken
+        - PortfolioRebalance
+        - Delegation
+        - UserStat
       abis:
         - name: Portfolio
           file: ./abis/PollenDAO/Modules/portfolio/Portfolio.sol/Portfolio.json
@@ -61,7 +69,9 @@ dataSources:
           handler: handleAssetAdded
         - event: AssetRemoved(indexed address)
           handler: handleAssetRemoved
-        - event: PortfolioCreated(indexed address)
+        - event: PortfolioCreated(indexed address,indexed uint256)
+          handler: handlePortfolioCreated
+        - event: PortfolioClosed(indexed address,indexed uint256)
           handler: handlePortfolioCreated
 
   - kind: ethereum/contract
@@ -77,12 +87,15 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/quoter.ts
       entities:
+        # unlink entities which are not used after wiriting mappings
         - User
         - Asset
         - AssetBalance
         - Portfolio
         - PollenToken
         - PortfolioRebalance
+        - Delegation
+        - UserStat
       abis:
         - name: Quoter
           file: ./abis/PollenDAO/Modules/quoter/Quoter.sol/Quoter.json
@@ -91,3 +104,32 @@ dataSources:
           handler: handlePriceFeedAdded
         - event: PriceFeedRemoved(indexed address,uint8)
           handler: handlePriceFeedRemoved
+
+  # - kind: ethereum/contract
+  #   name: Delegation
+  #   network: {{ network }}
+  #   source:
+  #     address: '{{ pollenDAO }}'
+  #     abi: Delegation
+  #     startBlock: {{ startBlock }}
+  #   mapping:
+  #     kind: ethereum/events
+  #     apiVersion: 0.0.5
+  #     language: wasm/assemblyscript
+  #     file: ./src/mappings/delegation.ts
+  #     entities:
+  #       # unlink entities which are not used after wiriting mappings
+  #       - User
+  #       - Asset
+  #       - AssetBalance
+  #       - Portfolio
+  #       - PollenToken
+  #       - PortfolioRebalance
+  #       - Delegation
+  #       - UserStat
+  #     abis:
+  #       - name: Delegation
+  #         file: ./abis/PollenDAO/Modules/delegation/Delegation.sol/Delegation.json
+  #     eventHandlers:
+  #       - event: Delegated(indexed address,indexed address,uint256)
+  #         handler: handleDelegated
