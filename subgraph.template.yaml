@@ -69,7 +69,7 @@ dataSources:
           handler: handleAssetAdded
         - event: AssetRemoved(indexed address)
           handler: handleAssetRemoved
-        - event: PortfolioCreated(indexed address)
+        - event: PortfolioCreated(indexed address, indexed uint256)
           handler: handlePortfolioCreated
         - event: PortfolioClosed(indexed address,indexed uint256)
           handler: handlePortfolioCreated

@@ -52,6 +52,12 @@
         "internalType": "address",
         "name": "creator",
         "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "portfolioId",
+        "type": "uint256"
       }
     ],
     "name": "PortfolioCreated",
