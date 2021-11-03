@@ -22,6 +22,9 @@ type Portfolio @entity {
   id: ID!
   owner: User!
   assetBalances: [AssetBalance!]!
+  initialValue: BigInt!
+  closingValue: BigInt
+  pollenStake: BigInt!
 }
 
 type PollenToken @entity {

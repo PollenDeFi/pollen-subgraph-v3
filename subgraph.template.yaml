@@ -64,6 +64,8 @@ dataSources:
       abis:
         - name: Portfolio
           file: ./abis/PollenDAO/Modules/portfolio/Portfolio.sol/Portfolio.json
+        - name: PAI
+          file: ./abis/PAI/PAI.sol/PAI.json
       eventHandlers:
         - event: AssetAdded(indexed address)
           handler: handleAssetAdded
