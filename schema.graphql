@@ -52,4 +52,6 @@ type UserStat @entity {
   id: ID!
   totalDelegatedTo: BigInt!
   totalDelegatedFrom: BigInt!
+  reputation: BigInt!
+  pollenPnl: BigInt!
 }
