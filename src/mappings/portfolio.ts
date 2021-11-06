@@ -21,6 +21,7 @@ export function handlePortfolioCreated(event: PortfolioCreated): void {
   portfolio.owner = user.id
   // TODO: Waiting for Pollen stake from event params
   portfolio.pollenStake = BigInt.fromI32(100)
+  portfolio.createdTimestamp = event.block.timestamp
 
   let contract = PortfolioContract.bind(event.address)
 
@@ -52,6 +53,7 @@ export function handlePortfolioClosed(event: PortfolioClosed): void {
 
   // TODO: Waiting on event param
   portfolio.closingValue = BigInt.fromI32(100)
+  portfolio.closedTimestamp = event.block.timestamp
 
   if (portfolio.closingValue > portfolio.initialValue) {
     let percent = portfolio

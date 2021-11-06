@@ -1,6 +1,6 @@
 type User @entity {
   id: ID!
-  rebalances: [PortfolioRebalance!]! @derivedFrom(field: "user")
+  portfolioHistory: [Portfolio!]! @derivedFrom(field: "owner")
   currentPortfolio: Portfolio
   stats: UserStat!
 }
@@ -25,19 +25,14 @@ type Portfolio @entity {
   initialValue: BigInt!
   closingValue: BigInt
   pollenStake: BigInt!
+  createdTimestamp: BigInt!
+  closedTimestamp: BigInt
 }
 
 type PollenToken @entity {
   id: ID!
   asset: Asset!
   supply: BigInt!
-}
-
-type PortfolioRebalance @entity {
-  id: ID!
-  timestamp: BigInt!
-  portfolio: Portfolio!
-  user: User!
 }
 
 type Delegation @entity {

@@ -25,7 +25,6 @@ dataSources:
         - AssetBalance
         - Portfolio
         - PollenToken
-        - PortfolioRebalance
         - Delegation
         - UserStat
       abis:
@@ -58,7 +57,6 @@ dataSources:
         - AssetBalance
         - Portfolio
         - PollenToken
-        - PortfolioRebalance
         - Delegation
         - UserStat
       abis:
@@ -95,7 +93,6 @@ dataSources:
         - AssetBalance
         - Portfolio
         - PollenToken
-        - PortfolioRebalance
         - Delegation
         - UserStat
       abis:
