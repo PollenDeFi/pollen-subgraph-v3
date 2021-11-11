@@ -46,6 +46,6 @@ type UserStat @entity {
 
 type Module @entity {
   id: ID!
-  name: String!
+  address: String!
   lastUpdated: BigInt!
 }

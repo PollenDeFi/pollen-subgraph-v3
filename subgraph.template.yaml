@@ -69,9 +69,9 @@ dataSources:
           handler: handleAssetAdded
         - event: AssetRemoved(indexed address)
           handler: handleAssetRemoved
-        - event: PortfolioCreated(indexed address,indexed uint256)
+        - event: PortfolioCreated(indexed address,indexed uint256,indexed uint256,uint256)
           handler: handlePortfolioCreated
-        - event: PortfolioClosed(indexed address,indexed uint256)
+        - event: PortfolioClosed(indexed address,indexed uint256,indexed uint256)
           handler: handlePortfolioCreated
 
   - kind: ethereum/contract
