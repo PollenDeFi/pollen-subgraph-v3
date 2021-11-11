@@ -45,10 +45,10 @@ dataSources:
       file: ./src/mappings/portfolio.ts
       entities:
         - User
+        - UserStat
         - Asset
         - AssetBalance
         - Portfolio
-        - UserStat
       abis:
         - name: Portfolio
           file: ./abis/PollenDAO/Modules/portfolio/Portfolio.sol/Portfolio.json
@@ -77,15 +77,9 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/delegation.ts
       entities:
-        # unlink entities which are not used after wiriting mappings
         - User
-        - Asset
-        - AssetBalance
-        - Portfolio
-        - PollenToken
-        - PortfolioRebalance
-        - Delegation
         - UserStat
+        - Delegation
       abis:
         - name: Delegation
           file: ./abis/PollenDAO/Modules/delegation/Delegation.sol/Delegation.json
