@@ -19,14 +19,7 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/modules.ts
       entities:
-        # unlink entities which are not used after wiriting mappings
-        - User
-        - Asset
-        - AssetBalance
-        - Portfolio
-        - PollenToken
-        - Delegation
-        - UserStat
+        - Module
       abis:
         - name: PollenDAO
           file: ./abis/PollenDAO/PollenDAO.sol/PollenDAO.json
@@ -51,13 +44,10 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/portfolio.ts
       entities:
-        # unlink entities which are not used after wiriting mappings
         - User
         - Asset
         - AssetBalance
         - Portfolio
-        - PollenToken
-        - Delegation
         - UserStat
       abis:
         - name: Portfolio
@@ -69,10 +59,10 @@ dataSources:
           handler: handleAssetAdded
         - event: AssetRemoved(indexed address)
           handler: handleAssetRemoved
-        - event: PortfolioCreated(indexed address,indexed uint256,indexed uint256,uint256)
+        - event: PortfolioCreated(indexed address,indexed uint256,uint256)
           handler: handlePortfolioCreated
-        - event: PortfolioClosed(indexed address,indexed uint256,indexed uint256)
-          handler: handlePortfolioCreated
+        - event: PortfolioClosed(indexed address,indexed uint256,uint256,uint256)
+          handler: handlePortfolioClosed
 
   - kind: ethereum/contract
     name: Delegation
