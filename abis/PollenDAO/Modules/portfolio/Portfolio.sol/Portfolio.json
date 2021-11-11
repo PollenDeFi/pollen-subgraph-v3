@@ -39,6 +39,12 @@
         "internalType": "uint256",
         "name": "portfolioId",
         "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "closingValue",
+        "type": "uint256"
       }
     ],
     "name": "PortfolioClosed",
@@ -57,6 +63,18 @@
         "indexed": true,
         "internalType": "uint256",
         "name": "portfolioId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "initialValue",
         "type": "uint256"
       }
     ],
