@@ -1,4 +1,4 @@
-import { log } from '@graphprotocol/graph-ts'
+import { log, dataSource } from '@graphprotocol/graph-ts'
 
 import {
   ModuleAdded,
@@ -10,10 +10,10 @@ import { Module } from '../../generated/schema'
 
 export function handleModuleAdded(event: ModuleAdded): void {
 
-  let id = event.params.moduleAddr.toHexString()
+  let id = event.params.moduleName.toString()
   let module = new Module(id)
 
-  module.name = event.params.moduleName.toString()
+  module.address = event.params.moduleAddr.toHexString()
   module.lastUpdated = event.block.timestamp
 
   module.save()
@@ -21,12 +21,6 @@ export function handleModuleAdded(event: ModuleAdded): void {
 
 export function handleModuleUpdated(event: ModuleUpdated): void {
 
-  let module = Module.load(event.params.oldModuleAddr.toHexString())!
-
-  module.id = event.params.newModuleAddr.toHexString()
-  module.lastUpdated = event.block.timestamp
-
-  module.save()
 }
 
 export function handlePollenTokenSet(event: PollenTokenSet): void {
