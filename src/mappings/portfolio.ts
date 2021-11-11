@@ -8,52 +8,55 @@ import {
 } from '../../generated/Portfolio/Portfolio'
 import { PAI as ERC20 } from '../../generated/Portfolio/PAI'
 
-import { Portfolio, Asset, User, UserStat } from '../../generated/schema'
+import { Portfolio, Asset, AssetBalance, Module } from '../../generated/schema'
+
+import { getOrCreateUser, getOrCreateUserStat } from '../utils/User'
 
 export function handlePortfolioCreated(event: PortfolioCreated): void {
-  let userAddr = event.params.creator.toHexString()
-  let user = getOrCreateUser(userAddr)
-  let id = userAddr + '-' + event.params.portfolioId.toString()
 
-  // Should never already be a portfolio as restricted in contract
-  // and any existing will removed from PortfolioClosed handler first
+  let moduleAddress = Address.fromString(Module.load('PORTFOLIO')!.address)
+  let userAddr = event.params.creator.toHexString()
+  let id = event.params.portfolioId.toString()
+
   let portfolio = new Portfolio(id)
-  portfolio.owner = user.id
-  // TODO: Waiting for Pollen stake from event params
-  portfolio.pollenStake = BigInt.fromI32(100)
+  portfolio.owner = getOrCreateUser(userAddr).id
+  portfolio.pollenStake = event.params.amount
   portfolio.createdTimestamp = event.block.timestamp
 
   let contract = PortfolioContract.bind(event.address)
-
+  
   let storedPortfolio = contract.getPortfolio(
-    // TODO: Need to replace first param with module address once added
-    event.params.creator,
+    moduleAddress,
     event.params.creator,
     event.params.portfolioId
   )
-
   portfolio.initialValue = storedPortfolio.initialValue
 
-  // TODO: Read allocations and map to portfolio
+  let assets = contract.getAssets(moduleAddress)
+  let weights = contract.getPortfolio(
+    moduleAddress,
+    Address.fromString(portfolio.owner),
+    BigInt.fromString(portfolio.id)
+  ).weights
+
+  let mappedAssets = mapAssets(portfolio.id, assets, weights)
+  portfolio.assetBalances = mappedAssets
 
   portfolio.save()
 }
 
 export function handlePortfolioClosed(event: PortfolioClosed): void {
+
   let userAddr = event.params.creator.toHexString()
-  let id = userAddr + '-' + event.params.portfolioId.toString()
-  let portfolio = Portfolio.load(id)!
-
-  // TODO: Waiting for closing value from event params
   let userStat = getOrCreateUserStat(userAddr)
+  let id = userAddr + '-' + event.params.portfolioId.toString()
 
-  // TODO: Waiting for pnl from contract
-  let pollenPnl = BigInt.fromI32(100)
-  userStat.pollenPnl = userStat.pollenPnl.plus(pollenPnl)
-
-  // TODO: Waiting on event param
-  portfolio.closingValue = BigInt.fromI32(100)
+  let portfolio = Portfolio.load(id)!
+  portfolio.closingValue = event.params.closingValue
   portfolio.closedTimestamp = event.block.timestamp
+
+  let pollenPnl = event.params.amount
+  userStat.pollenPnl = userStat.pollenPnl.plus(pollenPnl)
 
   if (portfolio.closingValue > portfolio.initialValue) {
     let percent = portfolio
@@ -76,11 +79,14 @@ export function handlePortfolioClosed(event: PortfolioClosed): void {
 }
 
 export function handleAssetAdded(event: AssetAdded): void {
+
   let assetToken = Asset.load(event.params.asset.toHexString())
   if (assetToken == null) {
     assetToken = new Asset(event.params.asset.toHexString())
   }
+
   let assetContract = ERC20.bind(Address.fromString(assetToken.id))
+
   assetToken.name = assetContract.name()
   assetToken.symbol = assetContract.symbol()
   assetToken.decimals = assetContract.decimals()
@@ -88,28 +94,22 @@ export function handleAssetAdded(event: AssetAdded): void {
   assetToken.save()
 }
 
-function getOrCreateUser(address: string): User {
-  let user = User.load(address)
-  if (user == null) {
-    let userStat = getOrCreateUserStat(address)
+function mapAssets(portfolioId: string, assets: Address[], weights: i32[]): string[] {
+  let assetBalances!: string[]
 
-    user = new User(address)
-    user.stats = userStat.id
-    user.save()
+  for(let i=0; i<assets.length; i++) {
+
+    if(weights[i]) {
+      let asset = Asset.load(assets[i].toHexString())
+      let assetBalance = new AssetBalance(assets[i].toHexString() + '-' + portfolioId)
+  
+      assetBalance.asset = asset!.id
+      assetBalance.amount = BigInt.fromI32(weights.at(i))
+      assetBalance.save()
+  
+      assetBalances.push(assetBalance.id)
+    }
   }
-  return user as User
-}
 
-function getOrCreateUserStat(address: string): UserStat {
-  let stat = UserStat.load(address)
-  if (stat == null) {
-    let stat = new UserStat(address)
-    stat.totalDelegatedTo = BigInt.zero()
-    stat.totalDelegatedFrom = BigInt.zero()
-    stat.reputation = BigInt.zero()
-    stat.pollenPnl = BigInt.fromI32(0)
-
-    stat.save()
-  }
-  return stat as UserStat
+  return assetBalances
 }
