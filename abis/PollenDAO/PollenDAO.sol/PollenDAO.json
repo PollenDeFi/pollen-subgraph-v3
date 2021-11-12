@@ -26,6 +26,12 @@
         "internalType": "address",
         "name": "moduleAddr",
         "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "string",
+        "name": "moduleName",
+        "type": "string"
       }
     ],
     "name": "ModuleAdded",
@@ -112,6 +118,11 @@
         "internalType": "address",
         "name": "_moduleAddr",
         "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "_moduleName",
+        "type": "string"
       }
     ],
     "name": "registerModule",
@@ -156,6 +167,11 @@
         "internalType": "address",
         "name": "oldAddr",
         "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "_moduleName",
+        "type": "string"
       }
     ],
     "name": "updateModule",

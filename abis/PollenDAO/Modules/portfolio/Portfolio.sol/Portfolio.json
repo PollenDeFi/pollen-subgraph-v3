@@ -39,6 +39,18 @@
         "internalType": "uint256",
         "name": "portfolioId",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "closingValue",
+        "type": "uint256"
       }
     ],
     "name": "PortfolioClosed",
@@ -57,6 +69,12 @@
         "indexed": true,
         "internalType": "uint256",
         "name": "portfolioId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
         "type": "uint256"
       }
     ],
@@ -77,6 +95,24 @@
       }
     ],
     "name": "addAsset",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "burnTest",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -211,6 +247,29 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "mintTest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

@@ -29,18 +29,11 @@ type Portfolio @entity {
   closedTimestamp: BigInt
 }
 
-type PollenToken @entity {
-  id: ID!
-  asset: Asset!
-  supply: BigInt!
-}
-
 type Delegation @entity {
   id: ID!
   delegator: User!
   delegatee: User!
   amount: BigInt!
-  token: PollenToken!
 }
 
 type UserStat @entity {
@@ -49,4 +42,10 @@ type UserStat @entity {
   totalDelegatedFrom: BigInt!
   reputation: BigInt!
   pollenPnl: BigInt!
+}
+
+type Module @entity {
+  id: ID!
+  address: String!
+  lastUpdated: BigInt!
 }
