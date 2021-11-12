@@ -55,8 +55,7 @@ export function handlePortfolioClosed(event: PortfolioClosed): void {
   portfolio.closingValue = event.params.closingValue
   portfolio.closedTimestamp = event.block.timestamp
 
-  let pollenPnl = event.params.amount
-  userStat.pollenPnl = userStat.pollenPnl.plus(pollenPnl)
+  let pollenAmount = event.params.amount
 
   if (portfolio.closingValue > portfolio.initialValue) {
     let percent = portfolio
@@ -65,6 +64,8 @@ export function handlePortfolioClosed(event: PortfolioClosed): void {
 
     let repIncrease = userStat.reputation.times(percent)
     userStat.reputation = userStat.reputation.plus(repIncrease)
+    userStat.pollenPnl = userStat.pollenPnl.plus(pollenAmount)
+
   } else {
     let percent = portfolio.initialValue
       .minus(portfolio.closingValue!)
@@ -72,6 +73,7 @@ export function handlePortfolioClosed(event: PortfolioClosed): void {
 
     let repDecrease = userStat.reputation.times(percent)
     userStat.reputation = userStat.reputation.minus(repDecrease)
+    userStat.pollenPnl = userStat.pollenPnl.minus(pollenAmount)
   }
 
   userStat.save()
