@@ -16,7 +16,7 @@ export function getOrCreateUser(address: string): User {
 export function getOrCreateUserStat(address: string): UserStat {
   let stat = UserStat.load(address)
   if (stat == null) {
-    let stat = new UserStat(address)
+    stat = new UserStat(address)
     stat.totalDelegatedTo = BigInt.zero()
     stat.totalDelegatedFrom = BigInt.zero()
     stat.reputation = BigInt.zero()
