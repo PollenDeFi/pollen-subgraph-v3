@@ -1,4 +1,4 @@
-import { BigInt } from '@graphprotocol/graph-ts'
+import { BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { User, UserStat } from '../../generated/schema'
 
 export function getOrCreateUser(address: string): User {
@@ -19,8 +19,9 @@ export function getOrCreateUserStat(address: string): UserStat {
     stat = new UserStat(address)
     stat.totalDelegatedTo = BigInt.zero()
     stat.totalDelegatedFrom = BigInt.zero()
-    stat.reputation = BigInt.zero()
+    stat.reputation = BigDecimal.fromString('1.0')
     stat.pollenPnl = BigInt.fromI32(0)
+    stat.totalRebalances = BigInt.fromI32(0)
 
     stat.save()
   }

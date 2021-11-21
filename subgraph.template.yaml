@@ -24,7 +24,7 @@ dataSources:
         - name: PollenDAO
           file: ./abis/PollenDAO/PollenDAO.sol/PollenDAO.json
       eventHandlers:
-        - event: ModuleAdded(indexed address,indexed string)
+        - event: ModuleAdded(indexed address,string)
           handler: handleModuleAdded
         - event: ModuleUpdated(indexed address,address)
           handler: handleModuleUpdated
@@ -47,7 +47,7 @@ dataSources:
         - User
         - UserStat
         - Asset
-        - AssetBalance
+        - PortfolioAllocation
         - Portfolio
       abis:
         - name: Portfolio
@@ -59,9 +59,9 @@ dataSources:
           handler: handleAssetAdded
         - event: AssetRemoved(indexed address)
           handler: handleAssetRemoved
-        - event: PortfolioCreated(indexed address,indexed uint256,indexed uint256)
+        - event: PortfolioCreated(indexed address,uint256,uint256)
           handler: handlePortfolioCreated
-        - event: PortfolioClosed(indexed address,indexed uint256,uint256,indexed uint256)
+        - event: PortfolioClosed(indexed address,uint256,uint256,uint256)
           handler: handlePortfolioClosed
 
   - kind: ethereum/contract
@@ -84,5 +84,5 @@ dataSources:
         - name: Delegation
           file: ./abis/PollenDAO/Modules/delegation/Delegation.sol/Delegation.json
       eventHandlers:
-        - event: Delegated(indexed address,indexed address,indexed uint256)
+        - event: Delegated(indexed address,indexed address,uint256)
           handler: handleDelegated

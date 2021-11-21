@@ -1,4 +1,4 @@
-import { BigInt, Address } from '@graphprotocol/graph-ts'
+import { BigInt, Address, log } from '@graphprotocol/graph-ts'
 
 import {
   Portfolio as PortfolioContract,
@@ -8,69 +8,87 @@ import {
 } from '../../generated/Portfolio/Portfolio'
 import { PAI as ERC20 } from '../../generated/Portfolio/PAI'
 
-import { Portfolio, Asset, AssetBalance, Module } from '../../generated/schema'
+import { Portfolio, Asset, PortfolioAllocation, Module } from '../../generated/schema'
 
 import { getOrCreateUser, getOrCreateUserStat } from '../utils/User'
 
 export function handlePortfolioCreated(event: PortfolioCreated): void {
-  //   let moduleAddress = Address.fromString(Module.load('PORTFOLIO')!.address)
-  // Waiting for module added event to be fixed
-  let moduleAddress = Address.fromString('0x23A8F41d045D1bdE5C4CCc6C47D56cf762f1F5a6')
-  let userAddr = event.params.creator.toHexString()
+  let moduleAddress = Address.fromString(Module.load('PORTFOLIO')!.address)
+
   let id = event.params.portfolioId.toString()
-  let portfolio = new Portfolio(id)
-  portfolio.owner = getOrCreateUser(userAddr).id
-  portfolio.pollenStake = event.params.amount
-  portfolio.createdTimestamp = event.block.timestamp
+
   let contract = PortfolioContract.bind(event.address)
-  let storedPortfolio = contract.getPortfolio(
+  let storedPortfolio = contract.try_getPortfolio(
     moduleAddress,
     event.params.creator,
     event.params.portfolioId
   )
-  portfolio.initialValue = storedPortfolio.initialValue
-  let assets = contract.getAssets(moduleAddress)
-  let weights = contract.getPortfolio(
-    moduleAddress,
-    Address.fromString(portfolio.owner),
-    BigInt.fromString(portfolio.id)
-  ).assetAmounts
-  let mappedAssets = mapAssets(portfolio.id, assets, weights)
-  portfolio.assetBalances = mappedAssets
-  portfolio.save()
+  if (storedPortfolio.reverted) {
+    log.info('Failed to fetch portfolio {}', [id])
+  } else {
+    let userAddr = event.params.creator.toHexString()
+    let portfolio = new Portfolio(id)
+    let owner = getOrCreateUser(userAddr)
+    let userStat = getOrCreateUserStat(userAddr)
+    userStat.totalRebalances = userStat.totalRebalances.plus(BigInt.fromI32(1))
+
+    portfolio.owner = owner.id
+    portfolio.pollenStake = event.params.amount
+    portfolio.createdTimestamp = event.block.timestamp
+
+    portfolio.initialValue = storedPortfolio.value.initialValue
+    let assets = contract.getAssets(moduleAddress)
+    let amounts = storedPortfolio.value.assetAmounts
+    let weights = storedPortfolio.value.weights
+
+    let allocations = mapAllocations(portfolio.id, assets, weights, amounts)
+    portfolio.allocations = allocations
+    portfolio.save()
+
+    owner.currentPortfolio = portfolio.id
+    owner.save()
+    userStat.save()
+  }
 }
 
 export function handlePortfolioClosed(event: PortfolioClosed): void {
   let userAddr = event.params.creator.toHexString()
   let userStat = getOrCreateUserStat(userAddr)
-  let id = userAddr + '-' + event.params.portfolioId.toString()
+  let user = getOrCreateUser(userAddr)
+  user.currentPortfolio = null
+  let id = event.params.portfolioId.toString()
 
-  let portfolio = Portfolio.load(id)!
-  portfolio.closingValue = event.params.closingValue
-  portfolio.closedTimestamp = event.block.timestamp
+  let portfolio = Portfolio.load(id)
 
-  let pollenAmount = event.params.gainOrLossAmount
+  if (portfolio !== null) {
+    portfolio.closingValue = event.params.closingValue
+    portfolio.closedTimestamp = event.block.timestamp
 
-  if (portfolio.closingValue > portfolio.initialValue) {
-    let percent = portfolio
-      .closingValue!.minus(portfolio.initialValue)
-      .div(portfolio.initialValue)
+    let pollenAmount = event.params.gainOrLossAmount
 
-    let repIncrease = userStat.reputation.times(percent)
-    userStat.reputation = userStat.reputation.plus(repIncrease)
-    userStat.pollenPnl = userStat.pollenPnl.plus(pollenAmount)
+    if (portfolio.closingValue > portfolio.initialValue) {
+      let dif = portfolio.closingValue!.minus(portfolio.initialValue)
+      let percent = dif.toBigDecimal().div(portfolio.initialValue.toBigDecimal())
+
+      let repIncrease = userStat.reputation.times(percent)
+
+      userStat.reputation = userStat.reputation.plus(repIncrease)
+      userStat.pollenPnl = userStat.pollenPnl.plus(pollenAmount)
+    } else {
+      let dif = portfolio.initialValue.minus(portfolio.closingValue!)
+      let percent = dif.toBigDecimal().div(portfolio.initialValue.toBigDecimal())
+
+      let repDecrease = userStat.reputation.times(percent)
+      userStat.reputation = userStat.reputation.minus(repDecrease)
+      userStat.pollenPnl = userStat.pollenPnl.minus(pollenAmount)
+    }
+
+    portfolio.save()
   } else {
-    let percent = portfolio.initialValue
-      .minus(portfolio.closingValue!)
-      .div(portfolio.initialValue)
-
-    let repDecrease = userStat.reputation.times(percent)
-    userStat.reputation = userStat.reputation.minus(repDecrease)
-    userStat.pollenPnl = userStat.pollenPnl.minus(pollenAmount)
+    log.warning('no portfolio found when closing, {}', [id])
   }
-
   userStat.save()
-  portfolio.save()
+  user.save()
 }
 
 export function handleAssetAdded(event: AssetAdded): void {
@@ -88,21 +106,25 @@ export function handleAssetAdded(event: AssetAdded): void {
   assetToken.save()
 }
 
-function mapAssets(portfolioId: string, assets: Address[], weights: BigInt[]): string[] {
-  let assetBalances!: string[]
+function mapAllocations(
+  portfolioId: string,
+  assets: Address[],
+  weights: i32[],
+  amounts: BigInt[]
+): string[] {
+  let allocations: string[] = []
 
   for (let i = 0; i < assets.length; i++) {
-    if (weights[i]) {
-      let asset = Asset.load(assets[i].toHexString())
-      let assetBalance = new AssetBalance(assets[i].toHexString() + '-' + portfolioId)
+    let asset = Asset.load(assets[i].toHexString())
+    let allocation = new PortfolioAllocation(assets[i].toHexString() + '-' + portfolioId)
 
-      assetBalance.asset = asset!.id
-      assetBalance.amount = weights[i]
-      assetBalance.save()
+    allocation.asset = asset!.id
+    allocation.weight = weights[i]
+    allocation.amount = amounts[i]
+    allocation.save()
 
-      assetBalances.push(assetBalance.id)
-    }
+    allocations.push(allocation.id)
   }
 
-  return assetBalances
+  return allocations
 }

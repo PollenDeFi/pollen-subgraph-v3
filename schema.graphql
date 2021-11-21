@@ -12,16 +12,17 @@ type Asset @entity {
   decimals: Int!
 }
 
-type AssetBalance @entity {
+type PortfolioAllocation @entity {
   id: ID!
   asset: Asset!
   amount: BigInt!
+  weight: Int!
 }
 
 type Portfolio @entity {
   id: ID!
   owner: User!
-  assetBalances: [AssetBalance!]!
+  allocations: [PortfolioAllocation!]!
   initialValue: BigInt!
   closingValue: BigInt
   pollenStake: BigInt!
@@ -40,8 +41,9 @@ type UserStat @entity {
   id: ID!
   totalDelegatedTo: BigInt!
   totalDelegatedFrom: BigInt!
-  reputation: BigInt!
+  reputation: BigDecimal!
   pollenPnl: BigInt!
+  totalRebalances: BigInt!
 }
 
 type Module @entity {
