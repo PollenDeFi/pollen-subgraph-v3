@@ -54,6 +54,8 @@ dataSources:
           file: ./abis/PollenDAO/Modules/portfolio/Portfolio.sol/Portfolio.json
         - name: PAI
           file: ./abis/PAI/PAI.sol/PAI.json
+        - name: Quoter
+          file: ./abis/PollenDAO/Modules/quoter/Quoter.sol/Quoter.json
       eventHandlers:
         - event: AssetAdded(indexed address)
           handler: handleAssetAdded

@@ -17,6 +17,7 @@ type PortfolioAllocation @entity {
   asset: Asset!
   amount: BigInt!
   weight: Int!
+  initialUsdPrice: BigInt!
 }
 
 type Portfolio @entity {

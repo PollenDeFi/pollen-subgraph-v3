@@ -7,6 +7,7 @@ import {
   AssetAdded,
 } from '../../generated/Portfolio/Portfolio'
 import { PAI as ERC20 } from '../../generated/Portfolio/PAI'
+import { Quoter } from '../../generated/Quoter/Quoter'
 
 import { Portfolio, Asset, PortfolioAllocation, Module } from '../../generated/schema'
 
@@ -41,7 +42,15 @@ export function handlePortfolioCreated(event: PortfolioCreated): void {
     let amounts = storedPortfolio.value.assetAmounts
     let weights = storedPortfolio.value.weights
 
-    let allocations = mapAllocations(portfolio.id, assets, weights, amounts)
+    let quoterContract = Quoter.bind(event.address)
+
+    let allocations = mapAllocations(
+      portfolio.id,
+      assets,
+      weights,
+      amounts,
+      quoterContract
+    )
     portfolio.allocations = allocations
     portfolio.save()
 
@@ -110,14 +119,20 @@ function mapAllocations(
   portfolioId: string,
   assets: Address[],
   weights: i32[],
-  amounts: BigInt[]
+  amounts: BigInt[],
+  quoterContract: Quoter
 ): string[] {
   let allocations: string[] = []
+
+  let quoterModule = Address.fromString(Module.load('QUOTER')!.address)
 
   for (let i = 0; i < assets.length; i++) {
     let asset = Asset.load(assets[i].toHexString())
     let allocation = new PortfolioAllocation(assets[i].toHexString() + '-' + portfolioId)
 
+    let price = quoterContract.quotePrice(quoterModule, 0, Address.fromString(asset!.id))
+
+    allocation.initialUsdPrice = price.value0
     allocation.asset = asset!.id
     allocation.weight = weights[i]
     allocation.amount = amounts[i]
