@@ -35,7 +35,7 @@
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "portfolioId",
         "type": "uint256"
@@ -43,7 +43,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amount",
+        "name": "gainOrLossAmount",
         "type": "uint256"
       },
       {
@@ -66,7 +66,7 @@
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "portfolioId",
         "type": "uint256"
@@ -95,24 +95,6 @@
       }
     ],
     "name": "addAsset",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "burnTest",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -231,14 +213,24 @@
       {
         "components": [
           {
-            "internalType": "uint8[]",
-            "name": "weights",
-            "type": "uint8[]"
+            "internalType": "uint256[]",
+            "name": "assetAmounts",
+            "type": "uint256[]"
           },
           {
             "internalType": "uint256",
             "name": "initialValue",
             "type": "uint256"
+          },
+          {
+            "internalType": "uint8[]",
+            "name": "weights",
+            "type": "uint8[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "open",
+            "type": "bool"
           }
         ],
         "internalType": "struct PortfolioModuleStorage.Portfolio",
@@ -247,29 +239,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "mintTest",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

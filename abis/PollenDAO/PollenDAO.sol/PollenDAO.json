@@ -28,7 +28,7 @@
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "string",
         "name": "moduleName",
         "type": "string"
