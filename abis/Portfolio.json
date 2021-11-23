@@ -82,6 +82,37 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "portfolioId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "gainOrLossAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "PortfolioRebalanced",
+    "type": "event"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -218,14 +249,14 @@
             "type": "uint256[]"
           },
           {
-            "internalType": "uint256",
-            "name": "initialValue",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint8[]",
             "name": "weights",
             "type": "uint8[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "initialValue",
+            "type": "uint256"
           },
           {
             "internalType": "bool",
@@ -239,6 +270,34 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_portfolioId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_newAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint8[]",
+        "name": "_newWeights",
+        "type": "uint8[]"
+      }
+    ],
+    "name": "rebalancePortfolio",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

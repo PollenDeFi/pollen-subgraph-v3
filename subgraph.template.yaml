@@ -22,7 +22,7 @@ dataSources:
         - Module
       abis:
         - name: PollenDAO
-          file: ./abis/PollenDAO/PollenDAO.sol/PollenDAO.json
+          file: ./abis/PollenDAO.json
       eventHandlers:
         - event: ModuleAdded(indexed address,string)
           handler: handleModuleAdded
@@ -51,11 +51,11 @@ dataSources:
         - Portfolio
       abis:
         - name: Portfolio
-          file: ./abis/PollenDAO/Modules/portfolio/Portfolio.sol/Portfolio.json
+          file: ./abis/Portfolio.json
         - name: PAI
-          file: ./abis/PAI/PAI.sol/PAI.json
+          file: ./abis/PAI.json
         - name: Quoter
-          file: ./abis/PollenDAO/Modules/quoter/Quoter.sol/Quoter.json
+          file: ./abis/Quoter.json
       eventHandlers:
         - event: AssetAdded(indexed address)
           handler: handleAssetAdded
@@ -84,7 +84,7 @@ dataSources:
         - Delegation
       abis:
         - name: Delegation
-          file: ./abis/PollenDAO/Modules/delegation/Delegation.sol/Delegation.json
+          file: ./abis/Delegation.json
       eventHandlers:
         - event: Delegated(indexed address,indexed address,uint256)
           handler: handleDelegated
