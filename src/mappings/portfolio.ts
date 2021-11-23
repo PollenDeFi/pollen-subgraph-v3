@@ -7,7 +7,7 @@ import {
   AssetAdded,
 } from '../../generated/Portfolio/Portfolio'
 import { PAI as ERC20 } from '../../generated/Portfolio/PAI'
-import { Quoter } from '../../generated/Quoter/Quoter'
+import { Quoter } from '../../generated/Portfolio/Quoter'
 
 import { Portfolio, Asset, PortfolioAllocation, Module } from '../../generated/schema'
 
