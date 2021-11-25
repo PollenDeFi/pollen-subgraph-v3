@@ -123,13 +123,7 @@ export function handleAssetRemoved(event: AssetRemoved): void {
     assetToken = new Asset(event.params.asset.toHexString())
   }
 
-  let assetContract = ERC20.bind(Address.fromString(assetToken.id))
-
-  assetToken.name = assetContract.name()
-  assetToken.symbol = assetContract.symbol()
-  assetToken.decimals = assetContract.decimals()
   assetToken.isRemoved = true
-
   assetToken.save()
 }
 
