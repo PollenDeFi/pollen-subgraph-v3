@@ -119,12 +119,10 @@ export function handleAssetAdded(event: AssetAdded): void {
 
 export function handleAssetRemoved(event: AssetRemoved): void {
   let assetToken = Asset.load(event.params.asset.toHexString())
-  if (assetToken == null) {
-    assetToken = new Asset(event.params.asset.toHexString())
+  if (assetToken != null) {
+    assetToken.isRemoved = true
+    assetToken.save()
   }
-
-  assetToken.isRemoved = true
-  assetToken.save()
 }
 
 function mapAllocations(
