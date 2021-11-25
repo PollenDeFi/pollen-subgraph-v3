@@ -5,6 +5,7 @@ import {
   PortfolioCreated,
   PortfolioClosed,
   AssetAdded,
+  AssetRemoved
 } from '../../generated/Portfolio/Portfolio'
 import { PAI as ERC20 } from '../../generated/Portfolio/PAI'
 import { Quoter } from '../../generated/Portfolio/Quoter'
@@ -111,6 +112,23 @@ export function handleAssetAdded(event: AssetAdded): void {
   assetToken.name = assetContract.name()
   assetToken.symbol = assetContract.symbol()
   assetToken.decimals = assetContract.decimals()
+  assetToken.isRemoved = false
+
+  assetToken.save()
+}
+
+export function handleAssetRemoved(event: AssetRemoved): void {
+  let assetToken = Asset.load(event.params.asset.toHexString())
+  if (assetToken == null) {
+    assetToken = new Asset(event.params.asset.toHexString())
+  }
+
+  let assetContract = ERC20.bind(Address.fromString(assetToken.id))
+
+  assetToken.name = assetContract.name()
+  assetToken.symbol = assetContract.symbol()
+  assetToken.decimals = assetContract.decimals()
+  assetToken.isRemoved = true
 
   assetToken.save()
 }
