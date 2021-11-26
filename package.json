@@ -9,6 +9,7 @@
     "prepare:rinkeby": "mustache config/rinkeby.json subgraph.template.yaml > subgraph.yaml",
     "prepare:fuji": "mustache config/fuji.json subgraph.template.yaml > subgraph.yaml",
     "deploy:rinkeby": "graph deploy --node https://api.thegraph.com/deploy/ PollenDeFi/pollen-v3-rinkeby",
+    "deploy:fuji": "graph deploy --node https://api.thegraph.com/deploy/ PollenDeFi/pollen-v3-fuji",
     "create-local": "graph create --node http://localhost:8020/ PollenDeFi/pollen-subgraph-v3",
     "remove-local": "graph remove --node http://localhost:8020/ PollenDeFi/pollen-subgraph-v3",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 PollenDeFi/pollen-subgraph-v3"

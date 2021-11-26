@@ -107,6 +107,12 @@
         "internalType": "uint256",
         "name": "gainOrLossAmount",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "closingValue",
+        "type": "uint256"
       }
     ],
     "name": "PortfolioRebalanced",
