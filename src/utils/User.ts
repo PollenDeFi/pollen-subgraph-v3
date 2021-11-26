@@ -20,7 +20,7 @@ export function getOrCreateUserStat(address: string): UserStat {
     stat.totalDelegatedTo = BigInt.zero()
     stat.totalDelegatedFrom = BigInt.zero()
     stat.reputation = BigDecimal.fromString('1.0')
-    stat.pollenPnl = BigInt.fromI32(0)
+    stat.pollenPnl = BigDecimal.fromString('0')
     stat.totalRebalances = BigInt.fromI32(0)
 
     stat.save()
