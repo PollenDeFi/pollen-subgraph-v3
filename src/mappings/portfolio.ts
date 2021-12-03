@@ -1,4 +1,4 @@
-import { BigInt, Address, log, BigDecimal } from '@graphprotocol/graph-ts'
+import { BigInt, Address, log } from '@graphprotocol/graph-ts'
 
 import {
   Portfolio as PortfolioContract,
@@ -82,6 +82,7 @@ export function handleAssetAdded(event: AssetAdded): void {
   assetToken.name = assetContract.name()
   assetToken.symbol = assetContract.symbol()
   assetToken.decimals = assetContract.decimals()
+  assetToken.avgAllocation = 0;
   assetToken.isRemoved = false
   assetToken.addedTimestamp = event.block.timestamp
 
@@ -92,6 +93,7 @@ export function handleAssetRemoved(event: AssetRemoved): void {
   let assetToken = Asset.load(event.params.asset.toHexString())
   if (assetToken != null) {
     assetToken.isRemoved = true
+    assetToken.avgAllocation = 0;
     assetToken.save()
   }
 }
@@ -127,6 +129,11 @@ function mapAllocations(
       allocation.save()
 
       allocations.push(allocation.id)
+
+      if(asset && weights[i]) {
+        asset.avgAllocation = asset.avgAllocation + weights[i]
+        asset.save()
+      }
     }
   }
 
@@ -136,7 +143,7 @@ function mapAllocations(
 function updateUserStatsAfterRebalance(portfolio: Portfolio, gainOrLoss: BigInt): void {
   let userStat = getOrCreateUserStat(portfolio.owner)
 
-  if (portfolio.closingValue > portfolio.initialValue) {
+  if (portfolio.closingValue! > portfolio.initialValue) {
     log.warning('Closing value bigger {}', [gainOrLoss.toString()])
     let dif = portfolio.closingValue!.minus(portfolio.initialValue)
     let percent = dif.toBigDecimal().div(portfolio.initialValue.toBigDecimal())

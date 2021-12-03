@@ -10,6 +10,7 @@ type Asset @entity {
   name: String!
   symbol: String!
   decimals: Int!
+  avgAllocation: Int!
   isRemoved: Boolean!
   addedTimestamp: BigInt!
 }
