@@ -29,6 +29,7 @@ type Portfolio @entity {
   initialValue: BigInt!
   closingValue: BigInt
   pollenStake: BigInt!
+  stakeGainOrLoss: BigInt!
   createdTimestamp: BigInt!
   closedTimestamp: BigInt
 }
