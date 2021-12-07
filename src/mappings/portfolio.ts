@@ -14,14 +14,17 @@ import { Quoter } from '../../generated/Portfolio/Quoter'
 import { Portfolio, Asset, PortfolioAllocation, Module } from '../../generated/schema'
 
 import { getOrCreateUser, getOrCreateUserStat } from '../utils/User'
+import { getContractId, incrementPortfolioId, newPortfolioId } from '../utils/portfolio'
 
 export function handlePortfolioCreated(event: PortfolioCreated): void {
   log.info('portfolio created', [event.params.portfolioId.toString()])
 
+  let portfolioId = newPortfolioId(event.params.portfolioId.toString())
+
   createPortfolio(
     event.address,
     event.params.creator,
-    event.params.portfolioId,
+    portfolioId,
     event.params.amount,
     event.block.timestamp
   )
@@ -35,18 +38,26 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
     if (existingPortfolio !== null) {
       existingPortfolio.closingValue = event.params.closingValue
       existingPortfolio.closedTimestamp = event.block.timestamp
+      existingPortfolio.stakeGainOrLoss = event.params.gainOrLossAmount
       existingPortfolio.save()
 
       let gainOrLossAmount = event.params.gainOrLossAmount
       updateUserStatsAfterRebalance(existingPortfolio, gainOrLossAmount)
+
+      let portfolioId = incrementPortfolioId(existingPortfolio.id)
+
+      createPortfolio(
+        event.address,
+        event.params.creator,
+        portfolioId,
+        event.params.newAmount,
+        event.block.timestamp
+      )
+    } else {
+      log.error('Tried rebalance a portfolio that does not exist', [
+        event.params.portfolioId.toString(),
+      ])
     }
-    createPortfolio(
-      event.address,
-      event.params.creator,
-      event.params.portfolioId,
-      event.params.newAmount,
-      event.block.timestamp
-    )
   }
 }
 
@@ -60,6 +71,7 @@ export function handlePortfolioClosed(event: PortfolioClosed): void {
   if (portfolio !== null) {
     portfolio.closingValue = event.params.closingValue
     portfolio.closedTimestamp = event.block.timestamp
+    portfolio.stakeGainOrLoss = event.params.gainOrLossAmount
     portfolio.save()
 
     let gainOrLossAmount = event.params.gainOrLossAmount
@@ -167,22 +179,25 @@ function updateUserStatsAfterRebalance(portfolio: Portfolio, gainOrLoss: BigInt)
 function createPortfolio(
   contractAddress: Address,
   creator: Address,
-  portfolioId: BigInt,
+  portfolioGraphId: string,
   stake: BigInt,
   timestamp: BigInt
 ): void {
   let moduleAddress = Address.fromString(Module.load('PORTFOLIO')!.address)
 
   let contract = PortfolioContract.bind(contractAddress)
-  let storedPortfolio = contract.try_getPortfolio(moduleAddress, creator, portfolioId)
-
-  let id = portfolioId.toString()
+  let portfolioId = getContractId(portfolioGraphId)
+  let storedPortfolio = contract.try_getPortfolio(
+    moduleAddress,
+    creator,
+    BigInt.fromString(portfolioId)
+  )
 
   if (storedPortfolio.reverted) {
-    log.error('Failed to fetch portfolio {}', [id])
+    log.error('Failed to fetch portfolio {}', [portfolioGraphId])
   } else {
     let userAddr = creator.toHexString()
-    let portfolio = new Portfolio(id)
+    let portfolio = new Portfolio(portfolioGraphId)
     let owner = getOrCreateUser(userAddr)
     let userStat = getOrCreateUserStat(userAddr)
     userStat.totalRebalances = userStat.totalRebalances.plus(BigInt.fromI32(1))
