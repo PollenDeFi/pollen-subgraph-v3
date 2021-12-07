@@ -36,6 +36,16 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
   if (user.currentPortfolio !== null) {
     let existingPortfolio = Portfolio.load(user.currentPortfolio!)
     if (existingPortfolio !== null) {
+
+      for (let i = 0; i < existingPortfolio.allocations.length; i++) {
+        let allocation = PortfolioAllocation.load(existingPortfolio.allocations[i])!
+        let asset = Asset.load(allocation.asset)!
+
+        asset.totalAllocation = asset.totalAllocation - allocation.weight;
+        asset.save()
+      }
+
+
       existingPortfolio.closingValue = event.params.closingValue
       existingPortfolio.closedTimestamp = event.block.timestamp
       existingPortfolio.stakeGainOrLoss = event.params.gainOrLossAmount
@@ -69,6 +79,15 @@ export function handlePortfolioClosed(event: PortfolioClosed): void {
   let portfolio = Portfolio.load(id)
 
   if (portfolio !== null) {
+
+    for (let i = 0; i < portfolio.allocations.length; i++) {
+      let allocation = PortfolioAllocation.load(portfolio.allocations[i])!
+      let asset = Asset.load(allocation.asset)!
+
+      asset.totalAllocation = asset.totalAllocation - allocation.weight;
+      asset.save()
+    }
+
     portfolio.closingValue = event.params.closingValue
     portfolio.closedTimestamp = event.block.timestamp
     portfolio.stakeGainOrLoss = event.params.gainOrLossAmount
@@ -94,7 +113,7 @@ export function handleAssetAdded(event: AssetAdded): void {
   assetToken.name = assetContract.name()
   assetToken.symbol = assetContract.symbol()
   assetToken.decimals = assetContract.decimals()
-  assetToken.avgAllocation = 0;
+  assetToken.totalAllocation = 0;
   assetToken.isRemoved = false
   assetToken.addedTimestamp = event.block.timestamp
 
@@ -105,7 +124,7 @@ export function handleAssetRemoved(event: AssetRemoved): void {
   let assetToken = Asset.load(event.params.asset.toHexString())
   if (assetToken != null) {
     assetToken.isRemoved = true
-    assetToken.avgAllocation = 0;
+    assetToken.totalAllocation = 0;
     assetToken.save()
   }
 }
@@ -142,8 +161,8 @@ function mapAllocations(
 
       allocations.push(allocation.id)
 
-      if(asset && weights[i]) {
-        asset.avgAllocation = asset.avgAllocation + weights[i]
+      if (asset && weights[i]) {
+        asset.totalAllocation = asset.totalAllocation + weights[i]
         asset.save()
       }
     }
