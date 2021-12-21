@@ -15,11 +15,18 @@ import { Portfolio, Asset, PortfolioAllocation, Module } from '../../generated/s
 
 import { getOrCreateUser, getOrCreateUserStat } from '../utils/User'
 import { getContractId, incrementPortfolioId, newPortfolioId } from '../utils/portfolio'
+import { updateOverViewStats } from '../utils/OverviewStats'
 
 export function handlePortfolioCreated(event: PortfolioCreated): void {
   log.info('portfolio created', [event.params.portfolioId.toString()])
 
   let portfolioId = newPortfolioId(event.params.portfolioId.toString())
+
+  updateOverViewStats(
+    event.params.amount.toBigDecimal(),
+    event.params.creator.toHexString(),
+    undefined
+  )
 
   createPortfolio(
     event.address,
@@ -36,15 +43,13 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
   if (user.currentPortfolio !== null) {
     let existingPortfolio = Portfolio.load(user.currentPortfolio!)
     if (existingPortfolio !== null) {
-
       for (let i = 0; i < existingPortfolio.allocations.length; i++) {
         let allocation = PortfolioAllocation.load(existingPortfolio.allocations[i])!
         let asset = Asset.load(allocation.asset)!
 
-        asset.totalAllocation = asset.totalAllocation - allocation.weight;
+        asset.totalAllocation = asset.totalAllocation - allocation.weight
         asset.save()
       }
-
 
       existingPortfolio.closingValue = event.params.closingValue
       existingPortfolio.closedTimestamp = event.block.timestamp
@@ -79,12 +84,11 @@ export function handlePortfolioClosed(event: PortfolioClosed): void {
   let portfolio = Portfolio.load(id)
 
   if (portfolio !== null) {
-
     for (let i = 0; i < portfolio.allocations.length; i++) {
       let allocation = PortfolioAllocation.load(portfolio.allocations[i])!
       let asset = Asset.load(allocation.asset)!
 
-      asset.totalAllocation = asset.totalAllocation - allocation.weight;
+      asset.totalAllocation = asset.totalAllocation - allocation.weight
       asset.save()
     }
 
@@ -113,7 +117,7 @@ export function handleAssetAdded(event: AssetAdded): void {
   assetToken.name = assetContract.name()
   assetToken.symbol = assetContract.symbol()
   assetToken.decimals = assetContract.decimals()
-  assetToken.totalAllocation = 0;
+  assetToken.totalAllocation = 0
   assetToken.isRemoved = false
   assetToken.addedTimestamp = event.block.timestamp
 
@@ -124,7 +128,7 @@ export function handleAssetRemoved(event: AssetRemoved): void {
   let assetToken = Asset.load(event.params.asset.toHexString())
   if (assetToken != null) {
     assetToken.isRemoved = true
-    assetToken.totalAllocation = 0;
+    assetToken.totalAllocation = 0
     assetToken.save()
   }
 }
@@ -183,6 +187,7 @@ function updateUserStatsAfterRebalance(portfolio: Portfolio, gainOrLoss: BigInt)
 
     userStat.reputation = userStat.reputation.plus(repIncrease)
     userStat.pollenPnl = userStat.pollenPnl.plus(gainOrLoss.toBigDecimal())
+    updateOverViewStats(undefined, undefined, gainOrLoss.toBigDecimal())
   } else {
     log.warning('Closing value smaller {}', [gainOrLoss.toString()])
     let dif = portfolio.initialValue.minus(portfolio.closingValue!)
@@ -191,6 +196,7 @@ function updateUserStatsAfterRebalance(portfolio: Portfolio, gainOrLoss: BigInt)
     let repDecrease = userStat.reputation.times(percent)
     userStat.reputation = userStat.reputation.minus(repDecrease)
     userStat.pollenPnl = userStat.pollenPnl.minus(gainOrLoss.toBigDecimal())
+    updateOverViewStats(undefined, undefined, gainOrLoss.toBigDecimal().neg())
   }
   userStat.save()
 }

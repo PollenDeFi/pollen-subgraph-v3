@@ -56,3 +56,10 @@ type Module @entity {
   address: String!
   lastUpdated: BigInt!
 }
+
+type OverviewStat @entity {
+  id: ID!
+  assetManagers: [User!]!
+  totalStaked: BigDecimal!
+  totalPlnEarned: BigDecimal!
+}
