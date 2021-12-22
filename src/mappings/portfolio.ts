@@ -1,4 +1,4 @@
-import { BigInt, Address, log } from '@graphprotocol/graph-ts'
+import { BigInt, Address, log, BigDecimal } from '@graphprotocol/graph-ts'
 
 import {
   Portfolio as PortfolioContract,
@@ -14,12 +14,19 @@ import { Quoter } from '../../generated/Portfolio/Quoter'
 import { Portfolio, Asset, PortfolioAllocation, Module } from '../../generated/schema'
 
 import { getOrCreateUser, getOrCreateUserStat } from '../utils/User'
-import { getContractId, incrementPortfolioId, newPortfolioId } from '../utils/portfolio'
+import { getContractId, incrementPortfolioId, newPortfolioId } from '../utils/Portfolio'
+import { updateOverViewStats } from '../utils/OverviewStats'
 
 export function handlePortfolioCreated(event: PortfolioCreated): void {
   log.info('portfolio created', [event.params.portfolioId.toString()])
 
   let portfolioId = newPortfolioId(event.params.portfolioId.toString())
+
+  updateOverViewStats(
+    event.params.amount.toBigDecimal(),
+    event.params.creator.toHexString(),
+    BigDecimal.fromString('0')
+  )
 
   createPortfolio(
     event.address,
@@ -36,15 +43,13 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
   if (user.currentPortfolio !== null) {
     let existingPortfolio = Portfolio.load(user.currentPortfolio!)
     if (existingPortfolio !== null) {
-
       for (let i = 0; i < existingPortfolio.allocations.length; i++) {
         let allocation = PortfolioAllocation.load(existingPortfolio.allocations[i])!
         let asset = Asset.load(allocation.asset)!
 
-        asset.totalAllocation = asset.totalAllocation - allocation.weight;
+        asset.totalAllocation = asset.totalAllocation - allocation.weight
         asset.save()
       }
-
 
       existingPortfolio.closingValue = event.params.closingValue
       existingPortfolio.closedTimestamp = event.block.timestamp
@@ -52,7 +57,11 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
       existingPortfolio.save()
 
       let gainOrLossAmount = event.params.gainOrLossAmount
-      updateUserStatsAfterRebalance(existingPortfolio, gainOrLossAmount)
+      updateUserStatsAfterRebalance(
+        existingPortfolio,
+        event.params.newAmount,
+        gainOrLossAmount
+      )
 
       let portfolioId = incrementPortfolioId(existingPortfolio.id)
 
@@ -79,12 +88,11 @@ export function handlePortfolioClosed(event: PortfolioClosed): void {
   let portfolio = Portfolio.load(id)
 
   if (portfolio !== null) {
-
     for (let i = 0; i < portfolio.allocations.length; i++) {
       let allocation = PortfolioAllocation.load(portfolio.allocations[i])!
       let asset = Asset.load(allocation.asset)!
 
-      asset.totalAllocation = asset.totalAllocation - allocation.weight;
+      asset.totalAllocation = asset.totalAllocation - allocation.weight
       asset.save()
     }
 
@@ -95,7 +103,7 @@ export function handlePortfolioClosed(event: PortfolioClosed): void {
 
     let gainOrLossAmount = event.params.gainOrLossAmount
 
-    updateUserStatsAfterRebalance(portfolio, gainOrLossAmount)
+    updateUserStatsAfterRebalance(portfolio, BigInt.fromI32(0), gainOrLossAmount)
   } else {
     log.error('no portfolio found when closing, {}', [id])
   }
@@ -113,7 +121,7 @@ export function handleAssetAdded(event: AssetAdded): void {
   assetToken.name = assetContract.name()
   assetToken.symbol = assetContract.symbol()
   assetToken.decimals = assetContract.decimals()
-  assetToken.totalAllocation = 0;
+  assetToken.totalAllocation = 0
   assetToken.isRemoved = false
   assetToken.addedTimestamp = event.block.timestamp
 
@@ -124,7 +132,7 @@ export function handleAssetRemoved(event: AssetRemoved): void {
   let assetToken = Asset.load(event.params.asset.toHexString())
   if (assetToken != null) {
     assetToken.isRemoved = true
-    assetToken.totalAllocation = 0;
+    assetToken.totalAllocation = 0
     assetToken.save()
   }
 }
@@ -171,8 +179,17 @@ function mapAllocations(
   return allocations
 }
 
-function updateUserStatsAfterRebalance(portfolio: Portfolio, gainOrLoss: BigInt): void {
+function updateUserStatsAfterRebalance(
+  portfolio: Portfolio,
+  newStake: BigInt,
+  gainOrLoss: BigInt
+): void {
   let userStat = getOrCreateUserStat(portfolio.owner)
+
+  let newStakeDecimal = newStake.toBigDecimal()
+  let oldStakeDecimal = portfolio.pollenStake.toBigDecimal()
+
+  let stakeDif = newStakeDecimal.minus(oldStakeDecimal)
 
   if (portfolio.closingValue! > portfolio.initialValue) {
     log.warning('Closing value bigger {}', [gainOrLoss.toString()])
@@ -183,6 +200,8 @@ function updateUserStatsAfterRebalance(portfolio: Portfolio, gainOrLoss: BigInt)
 
     userStat.reputation = userStat.reputation.plus(repIncrease)
     userStat.pollenPnl = userStat.pollenPnl.plus(gainOrLoss.toBigDecimal())
+
+    updateOverViewStats(stakeDif, portfolio.owner, gainOrLoss.toBigDecimal())
   } else {
     log.warning('Closing value smaller {}', [gainOrLoss.toString()])
     let dif = portfolio.initialValue.minus(portfolio.closingValue!)
@@ -191,6 +210,7 @@ function updateUserStatsAfterRebalance(portfolio: Portfolio, gainOrLoss: BigInt)
     let repDecrease = userStat.reputation.times(percent)
     userStat.reputation = userStat.reputation.minus(repDecrease)
     userStat.pollenPnl = userStat.pollenPnl.minus(gainOrLoss.toBigDecimal())
+    updateOverViewStats(stakeDif, portfolio.owner, gainOrLoss.toBigDecimal().neg())
   }
   userStat.save()
 }
