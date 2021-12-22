@@ -60,6 +60,7 @@ type Module @entity {
 type OverviewStat @entity {
   id: ID!
   assetManagers: [User!]!
+  assetManagersCount: BigInt!
   totalStaked: BigDecimal!
   totalPlnEarned: BigDecimal!
 }

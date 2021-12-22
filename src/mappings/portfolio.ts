@@ -1,4 +1,4 @@
-import { BigInt, Address, log } from '@graphprotocol/graph-ts'
+import { BigInt, Address, log, BigDecimal } from '@graphprotocol/graph-ts'
 
 import {
   Portfolio as PortfolioContract,
@@ -14,7 +14,7 @@ import { Quoter } from '../../generated/Portfolio/Quoter'
 import { Portfolio, Asset, PortfolioAllocation, Module } from '../../generated/schema'
 
 import { getOrCreateUser, getOrCreateUserStat } from '../utils/User'
-import { getContractId, incrementPortfolioId, newPortfolioId } from '../utils/portfolio'
+import { getContractId, incrementPortfolioId, newPortfolioId } from '../utils/Portfolio'
 import { updateOverViewStats } from '../utils/OverviewStats'
 
 export function handlePortfolioCreated(event: PortfolioCreated): void {
@@ -25,7 +25,7 @@ export function handlePortfolioCreated(event: PortfolioCreated): void {
   updateOverViewStats(
     event.params.amount.toBigDecimal(),
     event.params.creator.toHexString(),
-    undefined
+    BigDecimal.fromString('0')
   )
 
   createPortfolio(
@@ -57,7 +57,11 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
       existingPortfolio.save()
 
       let gainOrLossAmount = event.params.gainOrLossAmount
-      updateUserStatsAfterRebalance(existingPortfolio, gainOrLossAmount)
+      updateUserStatsAfterRebalance(
+        existingPortfolio,
+        event.params.newAmount,
+        gainOrLossAmount
+      )
 
       let portfolioId = incrementPortfolioId(existingPortfolio.id)
 
@@ -99,7 +103,7 @@ export function handlePortfolioClosed(event: PortfolioClosed): void {
 
     let gainOrLossAmount = event.params.gainOrLossAmount
 
-    updateUserStatsAfterRebalance(portfolio, gainOrLossAmount)
+    updateUserStatsAfterRebalance(portfolio, BigInt.fromI32(0), gainOrLossAmount)
   } else {
     log.error('no portfolio found when closing, {}', [id])
   }
@@ -175,8 +179,17 @@ function mapAllocations(
   return allocations
 }
 
-function updateUserStatsAfterRebalance(portfolio: Portfolio, gainOrLoss: BigInt): void {
+function updateUserStatsAfterRebalance(
+  portfolio: Portfolio,
+  newStake: BigInt,
+  gainOrLoss: BigInt
+): void {
   let userStat = getOrCreateUserStat(portfolio.owner)
+
+  let newStakeDecimal = newStake.toBigDecimal()
+  let oldStakeDecimal = portfolio.pollenStake.toBigDecimal()
+
+  let stakeDif = newStakeDecimal.minus(oldStakeDecimal)
 
   if (portfolio.closingValue! > portfolio.initialValue) {
     log.warning('Closing value bigger {}', [gainOrLoss.toString()])
@@ -187,7 +200,8 @@ function updateUserStatsAfterRebalance(portfolio: Portfolio, gainOrLoss: BigInt)
 
     userStat.reputation = userStat.reputation.plus(repIncrease)
     userStat.pollenPnl = userStat.pollenPnl.plus(gainOrLoss.toBigDecimal())
-    updateOverViewStats(undefined, undefined, gainOrLoss.toBigDecimal())
+
+    updateOverViewStats(stakeDif, portfolio.owner, gainOrLoss.toBigDecimal())
   } else {
     log.warning('Closing value smaller {}', [gainOrLoss.toString()])
     let dif = portfolio.initialValue.minus(portfolio.closingValue!)
@@ -196,7 +210,7 @@ function updateUserStatsAfterRebalance(portfolio: Portfolio, gainOrLoss: BigInt)
     let repDecrease = userStat.reputation.times(percent)
     userStat.reputation = userStat.reputation.minus(repDecrease)
     userStat.pollenPnl = userStat.pollenPnl.minus(gainOrLoss.toBigDecimal())
-    updateOverViewStats(undefined, undefined, gainOrLoss.toBigDecimal().neg())
+    updateOverViewStats(stakeDif, portfolio.owner, gainOrLoss.toBigDecimal().neg())
   }
   userStat.save()
 }
