@@ -1,5 +1,5 @@
 import { OverviewStat } from '../../generated/schema'
-import { BigDecimal, BigInt } from '@graphprotocol/graph-ts'
+import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { USER_OVERVIEW_STATS_ID } from './constants'
 
 export function getOrCreateOverviewStats(): OverviewStat {
@@ -26,10 +26,13 @@ export function updateOverViewStats(
 
   overviewStats.totalStaked = overviewStats.totalStaked.plus(stake)
 
-  let isAssetManagerPresent = overviewStats.assetManagers.includes(assetManagerAddress)
+  let managers = overviewStats.assetManagers
+
+  let isAssetManagerPresent = managers.includes(assetManagerAddress)
 
   if (!isAssetManagerPresent) {
-    overviewStats.assetManagers.push(assetManagerAddress)
+    managers.push(assetManagerAddress)
+    overviewStats.assetManagers = managers
     overviewStats.assetManagersCount = overviewStats.assetManagersCount.plus(
       BigInt.fromI32(1)
     )
