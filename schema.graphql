@@ -1,7 +1,7 @@
 type User @entity {
   id: ID!
-  portfolioHistory: [Portfolio!]! @derivedFrom(field: "owner")
-  currentPortfolio: Portfolio
+  portfolioHistory: [VirtualPortfolio!]! @derivedFrom(field: "owner")
+  currentPortfolio: VirtualPortfolio
   stats: UserStat!
 }
 
@@ -23,16 +23,24 @@ type PortfolioAllocation @entity {
   initialUsdPrice: BigInt!
 }
 
-type Portfolio @entity {
+type PortfolioEntry @entity {
   id: ID!
-  owner: User!
-  allocations: [PortfolioAllocation!]!
   initialValue: BigInt!
   closingValue: BigInt
   pollenStake: BigInt!
   stakeGainOrLoss: BigInt!
+  allocations: [PortfolioAllocation!]!
   createdTimestamp: BigInt!
   closedTimestamp: BigInt
+}
+
+type VirtualPortfolio @entity {
+  id: ID!
+  owner: User!
+  currentEntry: PortfolioEntry
+  createdTimestamp: BigInt!
+  closedTimestamp: BigInt
+  rebalances: [PortfolioEntry!]!
 }
 
 type Delegation @entity {
