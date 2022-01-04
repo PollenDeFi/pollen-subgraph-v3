@@ -240,6 +240,7 @@ function updateUserStatsAfterRebalance(
     userStat.pollenPnl = userStat.pollenPnl.minus(gainOrLoss.toBigDecimal())
     updateOverViewStats(stakeDif, user.id, gainOrLoss.toBigDecimal().neg())
   }
+  userStat.totalRebalances = userStat.totalRebalances.plus(BigInt.fromI32(1))
   userStat.save()
 }
 
@@ -311,7 +312,6 @@ function createPortfolio(
     let portfolio = new VirtualPortfolio(portfolioId)
     let owner = getOrCreateUser(userAddr)
     let userStat = getOrCreateUserStat(userAddr)
-    userStat.totalRebalances = userStat.totalRebalances.plus(BigInt.fromI32(1))
 
     portfolio.owner = owner.id
     portfolio.createdTimestamp = timestamp
