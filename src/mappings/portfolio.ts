@@ -24,7 +24,7 @@ import { getOrCreateUser, getOrCreateUserStat } from '../utils/User'
 import { updateOverViewStats } from '../utils/OverviewStats'
 
 export function handlePortfolioCreated(event: PortfolioCreated): void {
-  log.info('portfolio created', [event.params.portfolioId.toString()])
+  log.info('Handle portfolio created', [event.params.portfolioId.toString()])
 
   let portfolioId = event.params.portfolioId.toString()
 
@@ -46,66 +46,69 @@ export function handlePortfolioCreated(event: PortfolioCreated): void {
 export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
   let userAddr = event.params.creator.toHexString()
   let user = getOrCreateUser(userAddr)
-  if (user.currentPortfolio !== null) {
-    let existingPortfolio = VirtualPortfolio.load(user.currentPortfolio!)
-    if (existingPortfolio !== null) {
-      if (existingPortfolio.currentEntry !== null) {
-        let currentEntry = PortfolioEntry.load(existingPortfolio.currentEntry!)!
+  log.info('Rebalancing Portfolio, {}, {}', [
+    event.params.portfolioId.toString(),
+    userAddr,
+  ])
+  let existingPortfolio = VirtualPortfolio.load(event.params.portfolioId.toString())
+  if (existingPortfolio !== null) {
+    if (existingPortfolio.currentEntry !== null) {
+      let currentEntry = PortfolioEntry.load(existingPortfolio.currentEntry!)!
 
-        for (let i = 0; i < currentEntry.allocations.length; i++) {
-          let allocation = PortfolioAllocation.load(currentEntry.allocations[i])!
-          let asset = Asset.load(allocation.asset)!
+      for (let i = 0; i < currentEntry.allocations.length; i++) {
+        let allocation = PortfolioAllocation.load(currentEntry.allocations[i])!
+        let asset = Asset.load(allocation.asset)!
 
-          asset.totalAllocation = asset.totalAllocation - allocation.weight
-          asset.save()
-        }
-
-        currentEntry.closingValue = event.params.closingValue
-        currentEntry.stakeGainOrLoss = event.params.gainOrLossAmount
-        currentEntry.closedTimestamp = event.block.timestamp
-        let gainOrLossAmount = event.params.gainOrLossAmount
-
-        updateUserStatsAfterRebalance(
-          currentEntry,
-          user,
-          event.params.newAmount,
-          gainOrLossAmount
-        )
-
-        currentEntry.save()
+        asset.totalAllocation = asset.totalAllocation - allocation.weight
+        asset.save()
       }
 
-      let newEntry = createPortfolioEntry(
-        event.address,
-        event.params.creator,
-        existingPortfolio.id,
+      currentEntry.closingValue = event.params.closingValue
+      currentEntry.stakeGainOrLoss = event.params.gainOrLossAmount
+      currentEntry.closedTimestamp = event.block.timestamp
+      let gainOrLossAmount = event.params.gainOrLossAmount
+
+      updateUserStatsAfterRebalance(
+        currentEntry,
+        user,
         event.params.newAmount,
-        event.block.timestamp
+        gainOrLossAmount
       )
 
-      if (newEntry) {
-        let rebalances = existingPortfolio.rebalances
-        rebalances.push(existingPortfolio.currentEntry!)
-        existingPortfolio.rebalances = rebalances
-
-        existingPortfolio.currentEntry = newEntry.id
-      }
-
-      existingPortfolio.save()
-    } else {
-      log.error('Tried rebalance a portfolio that does not exist', [
-        event.params.portfolioId.toString(),
-      ])
+      currentEntry.save()
     }
+
+    let newEntry = createPortfolioEntry(
+      event.address,
+      event.params.creator,
+      existingPortfolio.id,
+      event.params.newAmount,
+      event.block.timestamp
+    )
+
+    if (newEntry) {
+      let rebalances = existingPortfolio.rebalances
+      rebalances.push(existingPortfolio.currentEntry!)
+      existingPortfolio.rebalances = rebalances
+      existingPortfolio.currentEntry = newEntry.id
+    }
+    user.currentPortfolio = existingPortfolio.id
+    existingPortfolio.save()
+    user.save()
+  } else {
+    log.error('Tried to rebalance a portfolio that does not exist', [
+      event.params.portfolioId.toString(),
+    ])
   }
 }
 
 export function handlePortfolioClosed(event: PortfolioClosed): void {
   let userAddr = event.params.creator.toHexString()
   let user = getOrCreateUser(userAddr)
-  user.currentPortfolio = null
   let id = event.params.portfolioId.toString()
   let portfolio = VirtualPortfolio.load(id)!
+
+  log.info('Closing portfolio, {}', [portfolio.id])
 
   if (portfolio && portfolio.currentEntry) {
     let currentEntry = PortfolioEntry.load(portfolio.currentEntry!)!
@@ -134,6 +137,7 @@ export function handlePortfolioClosed(event: PortfolioClosed): void {
     log.error('no portfolio found when closing, {}', [id])
   }
 
+  user.currentPortfolio = null
   user.save()
 }
 
@@ -220,7 +224,6 @@ function updateUserStatsAfterRebalance(
   let stakeDif = newStakeDecimal.minus(oldStakeDecimal)
 
   if (portfolioEntry.closingValue! > portfolioEntry.initialValue) {
-    log.warning('Closing value bigger {}', [gainOrLoss.toString()])
     let dif = portfolioEntry.closingValue!.minus(portfolioEntry.initialValue)
     let percent = dif.toBigDecimal().div(portfolioEntry.initialValue.toBigDecimal())
 
@@ -231,7 +234,6 @@ function updateUserStatsAfterRebalance(
 
     updateOverViewStats(stakeDif, user.id, gainOrLoss.toBigDecimal())
   } else {
-    log.warning('Closing value smaller {}', [gainOrLoss.toString()])
     let dif = portfolioEntry.initialValue.minus(portfolioEntry.closingValue!)
     let percent = dif.toBigDecimal().div(portfolioEntry.initialValue.toBigDecimal())
 
@@ -284,6 +286,7 @@ function createPortfolioEntry(
       quoterContract
     )
     entry.allocations = allocations
+
     entry.save()
     return entry
   }

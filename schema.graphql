@@ -52,6 +52,7 @@ type Delegation @entity {
 
 type UserStat @entity {
   id: ID!
+  user: User!
   address: String!
   totalDelegatedTo: BigInt!
   totalDelegatedFrom: BigInt!
