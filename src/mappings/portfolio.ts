@@ -88,7 +88,7 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
 
     if (newEntry) {
       let rebalances = existingPortfolio.rebalances
-      rebalances.push(existingPortfolio.currentEntry!)
+      rebalances.push(newEntry.id)
       existingPortfolio.rebalances = rebalances
       existingPortfolio.currentEntry = newEntry.id
     }
@@ -169,7 +169,7 @@ export function handleAssetRemoved(event: AssetRemoved): void {
 }
 
 function mapAllocations(
-  portfolioId: string,
+  entryId: string,
   assets: Address[],
   weights: i32[],
   amounts: BigInt[],
@@ -182,9 +182,7 @@ function mapAllocations(
   for (let i = 0; i < assets.length; i++) {
     if (assets[i] !== null) {
       let asset = Asset.load(assets[i].toHexString())
-      let allocation = new PortfolioAllocation(
-        assets[i].toHexString() + '-' + portfolioId
-      )
+      let allocation = new PortfolioAllocation(assets[i].toHexString() + '-' + entryId)
 
       let price = quoterContract.quotePrice(
         quoterModule,
@@ -278,13 +276,7 @@ function createPortfolioEntry(
 
     let quoterContract = Quoter.bind(contractAddress)
 
-    let allocations = mapAllocations(
-      portfolioId,
-      assets,
-      weights,
-      amounts,
-      quoterContract
-    )
+    let allocations = mapAllocations(entry.id, assets, weights, amounts, quoterContract)
     entry.allocations = allocations
 
     entry.save()
@@ -331,7 +323,7 @@ function createPortfolio(
       portfolio.currentEntry = entry.id
 
       let rebalances = portfolio.rebalances
-      rebalances.push(portfolio.currentEntry!)
+      rebalances.push(entry.id)
       portfolio.rebalances = rebalances
     }
 
