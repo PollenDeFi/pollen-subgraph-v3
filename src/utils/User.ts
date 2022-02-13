@@ -1,23 +1,10 @@
 import { BigDecimal, BigInt } from '@graphprotocol/graph-ts'
-import { User, UserStat } from '../../generated/schema'
-
-export function getOrCreateUser(address: string): User {
-  let user = User.load(address)
-  if (user == null) {
-    let userStat = getOrCreateUserStat(address)
-
-    user = new User(address)
-    user.stats = userStat.id
-    user.save()
-  }
-  return user as User
-}
+import { UserStat, Delegation } from '../../generated/schema'
 
 export function getOrCreateUserStat(address: string): UserStat {
   let stat = UserStat.load(address)
   if (stat == null) {
     stat = new UserStat(address)
-    stat.user = address
     stat.address = address
     stat.totalDelegatedTo = BigInt.zero()
     stat.totalDelegatedFrom = BigInt.zero()

@@ -1,16 +1,9 @@
-type User @entity {
-  id: ID!
-  portfolioHistory: [VirtualPortfolio!]! @derivedFrom(field: "owner")
-  currentPortfolio: VirtualPortfolio
-  stats: UserStat!
-}
-
 type Asset @entity {
   id: ID!
   name: String!
   symbol: String!
   decimals: Int!
-  totalAllocation: Int!
+  totalAllocation: BigInt!
   isRemoved: Boolean!
   addedTimestamp: BigInt!
 }
@@ -19,7 +12,7 @@ type PortfolioAllocation @entity {
   id: ID!
   asset: Asset!
   amount: BigInt!
-  weight: Int!
+  weight: BigInt!
   initialUsdPrice: BigInt!
 }
 
@@ -27,8 +20,6 @@ type PortfolioEntry @entity {
   id: ID!
   initialValue: BigInt!
   closingValue: BigInt
-  pollenStake: BigInt!
-  stakeGainOrLoss: BigInt!
   allocations: [PortfolioAllocation!]!
   createdTimestamp: BigInt!
   closedTimestamp: BigInt
@@ -36,41 +27,57 @@ type PortfolioEntry @entity {
 
 type VirtualPortfolio @entity {
   id: ID!
-  owner: User!
+  owner: String!
   currentEntry: PortfolioEntry
-  createdTimestamp: BigInt!
-  closedTimestamp: BigInt
+  isClosed: Boolean!
   rebalances: [PortfolioEntry!]!
-}
-
-type Delegation @entity {
-  id: ID!
-  delegator: User!
-  delegatee: User!
-  amount: BigInt!
+  pollenStake: BigInt!
+  stakeGainOrLoss: BigInt
 }
 
 type UserStat @entity {
   id: ID!
-  user: User!
   address: String!
   totalDelegatedTo: BigInt!
   totalDelegatedFrom: BigInt!
   reputation: BigDecimal!
   pollenPnl: BigDecimal!
   totalRebalances: BigInt!
-}
-
-type Module @entity {
-  id: ID!
-  address: String!
-  lastUpdated: BigInt!
+  totalDelegationFeesEarned: BigInt!
+  totalDelegationFeesPaid: BigInt!
 }
 
 type OverviewStat @entity {
   id: ID!
-  assetManagers: [User!]!
+  assetManagers: [String!]!
   assetManagersCount: BigInt!
   totalStaked: BigDecimal!
   totalPlnEarned: BigDecimal!
+}
+
+type Delegation @entity {
+  id: ID!
+  delegator: String!
+  delegatee: String!
+  amount: BigInt!
+  startTimestamp: BigInt!
+  updatedTimestamp: BigInt!
+  stopTimestamp: BigInt!
+}
+
+type DelegateWithdrawal @entity {
+  id: ID!
+  deposited: BigInt!
+  delegator: String!
+  delegatee: String!
+  delegatorRewardPenalty: BigDecimal!
+  delegateFee: BigInt!
+  timestamp: BigInt!
+}
+
+type PortfolioStakeWithdrawal @entity {
+  id: ID!
+  deposited: BigInt!
+  rewardPenalty: BigDecimal!
+  timestamp: BigInt!
 }

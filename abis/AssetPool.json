@@ -1,10 +1,5 @@
 [
   {
-    "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -71,7 +66,7 @@
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "address",
         "name": "oldImplementation",
         "type": "address"
@@ -129,26 +124,20 @@
   },
   {
     "inputs": [],
-    "name": "pollenToken",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "plnTokenAddress",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
       {
         "internalType": "address",
-        "name": "pollen",
+        "name": "token",
         "type": "address"
       }
     ],
-    "name": "setPollenToken",
+    "name": "setAssetPoolToken",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
