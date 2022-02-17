@@ -16,6 +16,12 @@ type PortfolioAllocation @entity {
   initialUsdPrice: BigInt!
 }
 
+type AssetProfitOrLoss @entity {
+  id: ID!
+  asset: Asset!
+  profitOrLoss: BigDecimal!
+}
+
 type PortfolioEntry @entity {
   id: ID!
   initialValue: BigInt!
@@ -27,12 +33,14 @@ type PortfolioEntry @entity {
 
 type VirtualPortfolio @entity {
   id: ID!
+  openTimestamp: BigInt!
   owner: String!
   currentEntry: PortfolioEntry
   isClosed: Boolean!
   rebalances: [PortfolioEntry!]!
   pollenStake: BigInt!
   stakeGainOrLoss: BigInt
+  assetsProfitOrLoss: [AssetProfitOrLoss!]!
 }
 
 type UserStat @entity {
@@ -51,8 +59,12 @@ type OverviewStat @entity {
   id: ID!
   assetManagers: [String!]!
   assetManagersCount: BigInt!
+  delegators: [String!]!
+  delegatorsCount: BigInt!
+  totalDelegated: BigDecimal!
   totalStaked: BigDecimal!
   totalPlnEarned: BigDecimal!
+  totalFeesPaid: BigInt!
 }
 
 type Delegation @entity {
@@ -79,5 +91,20 @@ type PortfolioStakeWithdrawal @entity {
   id: ID!
   deposited: BigInt!
   rewardPenalty: BigDecimal!
+  timestamp: BigInt!
+}
+
+enum ChartType {
+  PortfolioManagers
+  TotalStaked
+  TotalProfitLoss
+  Delegators
+  TotalDelegated
+}
+
+type DailyChartItem @entity {
+  id: ID!
+  type: ChartType!
+  value: BigDecimal!
   timestamp: BigInt!
 }

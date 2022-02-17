@@ -18,20 +18,22 @@ import {
   PortfolioAllocation,
   PortfolioEntry,
   Delegation,
+  AssetProfitOrLoss,
 } from '../../generated/schema'
 
 import { getOrCreateUserStat } from '../utils/User'
-import { updateOverViewStats } from '../utils/OverviewStats'
+import { updatePollenatorOverviewStats } from '../utils/OverviewStats'
 
 export function handlePortfolioCreated(event: PortfolioCreated): void {
-  let userAddr = event.params.creator.toString()
+  let userAddr = event.params.creator.toHexString()
 
   log.info('Handle portfolio created', [userAddr])
 
-  updateOverViewStats(
+  updatePollenatorOverviewStats(
     event.params.amount.toBigDecimal(),
     event.params.creator.toHexString(),
-    BigDecimal.fromString('0')
+    BigDecimal.fromString('0'),
+    event.block.timestamp
   )
 
   createPortfolio(
@@ -54,6 +56,7 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
       for (let i = 0; i < currentEntry.allocations.length; i++) {
         let allocation = PortfolioAllocation.load(currentEntry.allocations[i])!
         let asset = Asset.load(allocation.asset)!
+        updateAssetProfitLoss(existingPortfolio, allocation, event.address)
 
         asset.totalAllocation = asset.totalAllocation.minus(allocation.weight)
         asset.save()
@@ -117,8 +120,13 @@ export function handlePortfolioClosed(event: PortfolioClosed): void {
       currentEntry.closingValue = getPortfolioValue(event.address, assetAmounts)
       // TODO: Need to pass gain or loss amount once we have combined close and withdraw func
       let gainOrLoss = BigInt.zero()
+      // updatePollenatorOverviewStats(
+      //   BigDecimal.zero(),
+      //   userAddr,
+      //   gainOrLoss.toBigDecimal(),
+      //   event.block.timestamp
+      // )
       updateUserStatsAfterRebalance(currentEntry, userAddr, gainOrLoss)
-      updateOverViewStats(BigDecimal.zero(), userAddr, gainOrLoss.toBigDecimal())
     }
 
     portfolio.save()
@@ -156,8 +164,8 @@ export function handleAssetRemoved(event: AssetRemoved): void {
 }
 
 export function handleDelegated(event: Delegated): void {
-  let delegator = event.params.delegator.toString()
-  let delegatee = event.params.delegatee.toString()
+  let delegator = event.params.delegator.toHexString()
+  let delegatee = event.params.delegatee.toHexString()
 
   if (delegator === delegatee) {
     // Delegating to yourself just means increasing your current stake
@@ -262,10 +270,10 @@ function createPortfolioEntry(
   let storedPortfolio = contract.try_getPortfolio(creator)
 
   if (storedPortfolio.reverted) {
-    log.error('Failed to fetch portfolio {}', [creator.toString()])
+    log.error('Failed to fetch portfolio {}', [creator.toHexString()])
     return null
   } else {
-    let entry = new PortfolioEntry(creator.toString() + '-' + timestamp.toString())
+    let entry = new PortfolioEntry(creator.toHexString() + '-' + timestamp.toHexString())
 
     entry.createdTimestamp = timestamp
 
@@ -300,28 +308,32 @@ function createPortfolio(
   let storedPortfolio = contract.try_getPortfolio(creator)
 
   if (storedPortfolio.reverted) {
-    log.error('Failed to fetch portfolio {}', [creator.toString()])
+    log.error('Failed to fetch portfolio {}', [creator.toHexString()])
   } else {
     let userAddr = creator.toHexString()
     let portfolio = VirtualPortfolio.load(userAddr)
     if (portfolio == null) {
-      let portfolio = new VirtualPortfolio(userAddr)
-
+      portfolio = new VirtualPortfolio(userAddr)
+      portfolio.assetsProfitOrLoss = []
       portfolio.owner = userAddr
+      portfolio.openTimestamp = timestamp
       portfolio.pollenStake = stake
     }
 
     let entry = createPortfolioEntry(contractAddress, creator, weights, timestamp)
 
     if (entry) {
-      portfolio!.currentEntry = entry.id
+      portfolio.currentEntry = entry.id
 
-      let rebalances = portfolio!.rebalances
+      let rebalances = portfolio.rebalances
       rebalances.push(entry.id)
-      portfolio!.rebalances = rebalances
+      portfolio.rebalances = rebalances
     }
-    portfolio!.isClosed = false
-    portfolio!.save()
+    portfolio.isClosed = false
+    portfolio.save()
+
+    let userStat = getOrCreateUserStat(userAddr)
+    userStat.save()
   }
 }
 
@@ -340,4 +352,31 @@ function getPortfolioValue(
   } else {
     return portfolioValue.value
   }
+}
+
+function updateAssetProfitLoss(
+  portfolio: VirtualPortfolio,
+  allocation: PortfolioAllocation,
+  contractAddress: Address
+): void {
+  let profitLossId = portfolio.id + portfolio.openTimestamp.toString() + allocation.asset
+  let assetProfitOrLoss = AssetProfitOrLoss.load(profitLossId)
+
+  if (!assetProfitOrLoss) {
+    assetProfitOrLoss = new AssetProfitOrLoss(profitLossId)
+    assetProfitOrLoss.asset = allocation.asset
+    let profitAndLosses = portfolio.assetsProfitOrLoss
+    profitAndLosses.push(assetProfitOrLoss.id)
+    portfolio.rebalances = profitAndLosses
+  }
+
+  let startValue = allocation.initialUsdPrice.times(allocation.amount).toBigDecimal()
+
+  let quoterContract = Quoter.bind(contractAddress)
+  let price = quoterContract.quotePrice(0, Address.fromString(allocation.asset))
+  let endValue = price.value0.times(allocation.amount).toBigDecimal()
+  let diff = endValue.minus(startValue)
+
+  assetProfitOrLoss.profitOrLoss.plus(diff)
+  assetProfitOrLoss.save()
 }

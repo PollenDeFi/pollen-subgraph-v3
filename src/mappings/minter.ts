@@ -7,6 +7,10 @@ import {
   VirtualPortfolio,
   Delegation,
 } from '../../generated/schema'
+import {
+  updateDelegatorOverviewStats,
+  updatePollenatorOverviewStats,
+} from '../utils/OverviewStats'
 
 import { getOrCreateUserStat } from '../utils/User'
 
@@ -47,23 +51,27 @@ function handleWithdraw(
   timestamp: BigInt,
   isPenalty: boolean
 ): void {
+  let rewardPenaltyDecimal = isPenalty
+    ? rewardPenalty.toBigDecimal().neg()
+    : rewardPenalty.toBigDecimal()
+
   if (user === owner) {
     // User withdrawing thier own portfolio stake
     let id = owner + '-portfolio-withdraw-' + timestamp.toString()
     let withdrawal = new PortfolioStakeWithdrawal(id)
-    if (isPenalty) {
-      withdrawal.rewardPenalty = rewardPenalty.toBigDecimal().neg()
-    } else {
-      withdrawal.rewardPenalty = rewardPenalty.toBigDecimal()
-    }
+    withdrawal.rewardPenalty = rewardPenaltyDecimal
+
     withdrawal.deposited = deposited
     withdrawal.timestamp = timestamp
     let portfolio = VirtualPortfolio.load(owner)
     if (portfolio) {
+      // TODO: Handle partial withdraw when contract updated
       portfolio.pollenStake = BigInt.zero()
       portfolio.save()
     }
     withdrawal.save()
+    let stakeRemoved = deposited.toBigDecimal().neg()
+    updatePollenatorOverviewStats(stakeRemoved, owner, rewardPenaltyDecimal, timestamp)
   } else {
     // Delegator withdrawing thier delegation stake
     let id = user + '-delegate-withdraw-' + timestamp.toString()
@@ -82,15 +90,19 @@ function handleWithdraw(
     delegateeStat.totalDelegationFeesEarned = delegatorStat.totalDelegationFeesEarned.plus(
       fee
     )
+    delegateeStat.pollenPnl = delegateeStat.pollenPnl.plus(rewardPenaltyDecimal)
+
     let delegationId = user + '-' + owner
     let delegation = Delegation.load(delegationId)
     if (delegation) {
-      // TODO: Once partial withdraws are in place we'll
-      // need to adjust the amount down instead of to zero
+      // TODO: Handle partial withdraw when contract updated
       delegation.amount = BigInt.zero()
       delegation.save()
     }
+    delegateeStat.save()
     delegatorStat.save()
     withdrawal.save()
+    let stakeRemoved = deposited.toBigDecimal().neg()
+    updateDelegatorOverviewStats(stakeRemoved, user, rewardPenaltyDecimal, fee, timestamp)
   }
 }
