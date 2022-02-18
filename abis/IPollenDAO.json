@@ -289,6 +289,31 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "weights",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "PortfolioReopened",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "asset",
         "type": "address"
       },
@@ -415,7 +440,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "deposited",
+        "name": "amount",
         "type": "uint256"
       },
       {
@@ -452,7 +477,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "deposited",
+        "name": "amount",
         "type": "uint256"
       },
       {
@@ -557,6 +582,19 @@
       }
     ],
     "name": "claimTokens",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "closeAndWithdraw",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -709,7 +747,7 @@
     "inputs": [
       {
         "internalType": "uint256[]",
-        "name": "portfolioAssets",
+        "name": "isValidAsset",
         "type": "uint256[]"
       },
       {
@@ -818,14 +856,19 @@
     "name": "getTotalReward",
     "outputs": [
       {
-        "internalType": "uint256",
-        "name": "totalReward",
-        "type": "uint256"
+        "internalType": "uint256[]",
+        "name": "portfolioReturn",
+        "type": "uint256[]"
       },
       {
-        "internalType": "uint256",
-        "name": "totalPenalty",
-        "type": "uint256"
+        "internalType": "uint256[]",
+        "name": "rewards",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "bool[]",
+        "name": "isPositive",
+        "type": "bool[]"
       }
     ],
     "stateMutability": "view",
@@ -1014,6 +1057,11 @@
         "internalType": "uint256[]",
         "name": "weights",
         "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
       }
     ],
     "name": "rebalancePortfolio",
@@ -1073,6 +1121,63 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "minBalancePolinator",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxDelegation",
+        "type": "uint256"
+      }
+    ],
+    "name": "setLimitPortfolioBalance",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_maxNumAssets",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMaxNumberOfAssetsPerPortfolio",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_newMaxWithdrawls",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMaxNumberWithdrawls",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_penaltyMultiplier",
+        "type": "uint256"
+      }
+    ],
+    "name": "setPenaltyMultiplier",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "pollen",
         "type": "address"
@@ -1092,6 +1197,32 @@
       }
     ],
     "name": "setQuorum",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "rebalanceMinPeriod",
+        "type": "uint256"
+      }
+    ],
+    "name": "setRebalancePeriod",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_rewardMultiplier",
+        "type": "uint256"
+      }
+    ],
+    "name": "setRewardMultiplier",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1205,6 +1336,11 @@
         "internalType": "address",
         "name": "owner",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
       }
     ],
     "name": "withdraw",
@@ -1218,9 +1354,40 @@
         "internalType": "address[]",
         "name": "owners",
         "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
       }
     ],
     "name": "withdrawMany",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "withdrawRewards",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "owners",
+        "type": "address[]"
+      }
+    ],
+    "name": "withdrawRewardsMany",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

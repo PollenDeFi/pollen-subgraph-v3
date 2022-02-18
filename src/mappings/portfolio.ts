@@ -3,7 +3,6 @@ import { BigInt, Address, log, BigDecimal } from '@graphprotocol/graph-ts'
 import {
   Portfolio as PortfolioContract,
   PortfolioCreated,
-  PortfolioClosed,
   PortfolioRebalanced,
   AssetAdded,
   AssetRemoved,
@@ -21,7 +20,7 @@ import {
   AssetProfitOrLoss,
 } from '../../generated/schema'
 
-import { getOrCreateUserStat } from '../utils/User'
+import { getOrCreateUserStat } from '../utils/UserStat'
 import { updatePollenatorOverviewStats } from '../utils/OverviewStats'
 
 export function handlePortfolioCreated(event: PortfolioCreated): void {
@@ -65,7 +64,7 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
       currentEntry.closingValue = event.params.portfolioValue
       currentEntry.closedTimestamp = event.block.timestamp
 
-      updateUserStatsAfterRebalance(currentEntry, userAddr, BigInt.zero())
+      updateUserStatsAfterRebalance(currentEntry, userAddr, event.block.timestamp)
 
       currentEntry.save()
     }
@@ -83,56 +82,13 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
       existingPortfolio.rebalances = rebalances
       existingPortfolio.currentEntry = newEntry.id
     }
-    existingPortfolio.isClosed = false
+    if (event.params.weights[0] !== BigInt.fromString('100')) {
+      existingPortfolio.isClosed = false
+    }
+    existingPortfolio.updatedTimestamp = event.block.timestamp
     existingPortfolio.save()
   } else {
     log.error('Tried to rebalance a portfolio that does not exist', [userAddr])
-  }
-}
-
-export function handlePortfolioClosed(event: PortfolioClosed): void {
-  let userAddr = event.params.creator.toHexString()
-  let portfolio = VirtualPortfolio.load(userAddr)!
-
-  log.info('Closing portfolio, {}', [portfolio.id])
-
-  if (portfolio && portfolio.currentEntry) {
-    let currentEntry = PortfolioEntry.load(portfolio.currentEntry!)!
-
-    for (let i = 0; i < currentEntry.allocations.length; i++) {
-      let allocation = PortfolioAllocation.load(currentEntry.allocations[i])!
-      let asset = Asset.load(allocation.asset)!
-
-      asset.totalAllocation = asset.totalAllocation.minus(allocation.weight)
-      asset.save()
-    }
-
-    currentEntry.closedTimestamp = event.block.timestamp
-    portfolio.currentEntry = null
-    portfolio.isClosed = true
-
-    let contract = PortfolioContract.bind(event.address)
-    let storedPortfolio = contract.try_getPortfolio(event.params.creator)
-    if (storedPortfolio.reverted) {
-      log.error('Failed to fetch portfolio {}', [userAddr])
-    } else {
-      let assetAmounts = storedPortfolio.value.value0
-      currentEntry.closingValue = getPortfolioValue(event.address, assetAmounts)
-      // TODO: Need to pass gain or loss amount once we have combined close and withdraw func
-      let gainOrLoss = BigInt.zero()
-      // updatePollenatorOverviewStats(
-      //   BigDecimal.zero(),
-      //   userAddr,
-      //   gainOrLoss.toBigDecimal(),
-      //   event.block.timestamp
-      // )
-      updateUserStatsAfterRebalance(currentEntry, userAddr, gainOrLoss)
-    }
-
-    portfolio.save()
-    currentEntry.save()
-  } else {
-    log.error('no portfolio found when closing, {}', [userAddr])
   }
 }
 
@@ -167,12 +123,19 @@ export function handleDelegated(event: Delegated): void {
   let delegator = event.params.delegator.toHexString()
   let delegatee = event.params.delegatee.toHexString()
 
-  if (delegator === delegatee) {
+  log.info('handle delegated, {} {}', [delegator, delegatee])
+
+  if (delegator == delegatee) {
     // Delegating to yourself just means increasing your current stake
     let portfolio = VirtualPortfolio.load(delegatee)
     if (portfolio) {
       let newStake = portfolio.pollenStake.plus(event.params.amount)
       portfolio.pollenStake = newStake
+      portfolio.updatedTimestamp = event.block.timestamp
+      let delegateeStat = getOrCreateUserStat(delegatee)
+      delegateeStat.portfolioStake = newStake
+      delegateeStat.updatedTimestamp = event.block.timestamp
+      delegateeStat.save()
       portfolio.save()
     }
   } else {
@@ -180,21 +143,46 @@ export function handleDelegated(event: Delegated): void {
     let id = delegator + '-' + delegatee
 
     let delegation = Delegation.load(id)
+    let delegateeStat = getOrCreateUserStat(delegatee)
+    let delegatorStat = getOrCreateUserStat(delegator)
+
     if (delegation) {
       if (delegation.amount.isZero()) {
         // Starting again after returning to zero
         delegation.startTimestamp = event.block.timestamp
-      } else {
-        delegation.updatedTimestamp = event.block.timestamp
       }
+      delegation.updatedTimestamp = event.block.timestamp
       delegation.amount = delegation.amount.plus(event.params.amount)
     } else {
       delegation = new Delegation(id)
+      delegation.delegateeStats = delegateeStat.id
+      delegation.delegatorStats = delegatorStat.id
+      delegation.rewardsOrPenalties = BigDecimal.zero()
       delegation.delegatee = delegatee
       delegation.delegator = delegator
       delegation.amount = event.params.amount
       delegation.startTimestamp = event.block.timestamp
+      delegation.updatedTimestamp = event.block.timestamp
+      delegateeStat.totalDelegators = delegateeStat.totalDelegators.plus(
+        BigInt.fromString('1')
+      )
+
+      delegatorStat.totalDelegators = delegatorStat.totalDelegators.plus(
+        BigInt.fromString('1')
+      )
     }
+    delegatorStat.totalDelegatedTo = delegatorStat.totalDelegatedTo.plus(
+      event.params.amount
+    )
+    delegateeStat.totalDelegatedFrom = delegateeStat.totalDelegatedFrom.plus(
+      event.params.amount
+    )
+    delegateeStat.updatedTimestamp = event.block.timestamp
+    delegatorStat.updatedTimestamp = event.block.timestamp
+
+    delegatorStat.save()
+    delegateeStat.save()
+
     delegation.save()
   }
 }
@@ -236,7 +224,7 @@ function mapAllocations(
 function updateUserStatsAfterRebalance(
   portfolioEntry: PortfolioEntry,
   userAddr: string,
-  gainOrLoss: BigInt
+  timestamp: BigInt
 ): void {
   let userStat = getOrCreateUserStat(userAddr)
 
@@ -247,16 +235,15 @@ function updateUserStatsAfterRebalance(
     let repIncrease = userStat.reputation.times(percent)
 
     userStat.reputation = userStat.reputation.plus(repIncrease)
-    userStat.pollenPnl = userStat.pollenPnl.plus(gainOrLoss.toBigDecimal())
   } else {
     let dif = portfolioEntry.initialValue.minus(portfolioEntry.closingValue!)
     let percent = dif.toBigDecimal().div(portfolioEntry.initialValue.toBigDecimal())
 
     let repDecrease = userStat.reputation.times(percent)
     userStat.reputation = userStat.reputation.minus(repDecrease)
-    userStat.pollenPnl = userStat.pollenPnl.minus(gainOrLoss.toBigDecimal())
   }
   userStat.totalRebalances = userStat.totalRebalances.plus(BigInt.fromI32(1))
+  userStat.updatedTimestamp = timestamp
   userStat.save()
 }
 
@@ -306,18 +293,23 @@ function createPortfolio(
 ): void {
   let contract = PortfolioContract.bind(contractAddress)
   let storedPortfolio = contract.try_getPortfolio(creator)
+  let userAddr = creator.toHexString()
+  let userStat = getOrCreateUserStat(userAddr)
 
   if (storedPortfolio.reverted) {
     log.error('Failed to fetch portfolio {}', [creator.toHexString()])
   } else {
-    let userAddr = creator.toHexString()
     let portfolio = VirtualPortfolio.load(userAddr)
     if (portfolio == null) {
       portfolio = new VirtualPortfolio(userAddr)
       portfolio.assetsProfitOrLoss = []
+      portfolio.rewardsOrPenalties = BigDecimal.zero()
       portfolio.owner = userAddr
+      portfolio.updatedTimestamp = timestamp
       portfolio.openTimestamp = timestamp
       portfolio.pollenStake = stake
+      portfolio.ownerStats = userStat.id
+      portfolio.rebalances = []
     }
 
     let entry = createPortfolioEntry(contractAddress, creator, weights, timestamp)
@@ -332,7 +324,9 @@ function createPortfolio(
     portfolio.isClosed = false
     portfolio.save()
 
-    let userStat = getOrCreateUserStat(userAddr)
+    userStat.portfolio = portfolio.id
+    userStat.portfolioStake = stake
+    userStat.updatedTimestamp = timestamp
     userStat.save()
   }
 }
@@ -367,7 +361,7 @@ function updateAssetProfitLoss(
     assetProfitOrLoss.asset = allocation.asset
     let profitAndLosses = portfolio.assetsProfitOrLoss
     profitAndLosses.push(assetProfitOrLoss.id)
-    portfolio.rebalances = profitAndLosses
+    portfolio.assetsProfitOrLoss = profitAndLosses
   }
 
   let startValue = allocation.initialUsdPrice.times(allocation.amount).toBigDecimal()

@@ -96,9 +96,8 @@ export function updateDailyChartItem(
     chartItem = new DailyChartItem(dayID.toString() + '-' + type)
     chartItem.type = type
     chartItem.timestamp = timestamp
-    chartItem.save()
-    return
   }
+
   chartItem.value = value
   chartItem.save()
 }

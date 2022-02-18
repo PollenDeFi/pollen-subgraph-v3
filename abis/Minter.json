@@ -36,7 +36,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "deposited",
+        "name": "amount",
         "type": "uint256"
       },
       {
@@ -73,7 +73,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "deposited",
+        "name": "amount",
         "type": "uint256"
       },
       {
@@ -91,6 +91,19 @@
     ],
     "name": "WithdrawWithReward",
     "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "closeAndWithdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
     "inputs": [
@@ -131,9 +144,53 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_newMaxWithdrawls",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMaxNumberWithdrawls",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_penaltyMultiplier",
+        "type": "uint256"
+      }
+    ],
+    "name": "setPenaltyMultiplier",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_rewardMultiplier",
+        "type": "uint256"
+      }
+    ],
+    "name": "setRewardMultiplier",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "owner",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
       }
     ],
     "name": "withdraw",
@@ -147,9 +204,40 @@
         "internalType": "address[]",
         "name": "owners",
         "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
       }
     ],
     "name": "withdrawMany",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "withdrawRewards",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "owners",
+        "type": "address[]"
+      }
+    ],
+    "name": "withdrawRewardsMany",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

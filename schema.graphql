@@ -34,13 +34,15 @@ type PortfolioEntry @entity {
 type VirtualPortfolio @entity {
   id: ID!
   openTimestamp: BigInt!
+  updatedTimestamp: BigInt!
   owner: String!
   currentEntry: PortfolioEntry
   isClosed: Boolean!
   rebalances: [PortfolioEntry!]!
   pollenStake: BigInt!
-  stakeGainOrLoss: BigInt
+  rewardsOrPenalties: BigDecimal!
   assetsProfitOrLoss: [AssetProfitOrLoss!]!
+  ownerStats: UserStat!
 }
 
 type UserStat @entity {
@@ -48,11 +50,16 @@ type UserStat @entity {
   address: String!
   totalDelegatedTo: BigInt!
   totalDelegatedFrom: BigInt!
+  totalDelegators: BigInt!
   reputation: BigDecimal!
   pollenPnl: BigDecimal!
   totalRebalances: BigInt!
   totalDelegationFeesEarned: BigInt!
   totalDelegationFeesPaid: BigInt!
+  totalRewardsForDelegators: BigDecimal!
+  portfolio: VirtualPortfolio
+  portfolioStake: BigInt!
+  updatedTimestamp: BigInt
 }
 
 type OverviewStat @entity {
@@ -71,17 +78,20 @@ type Delegation @entity {
   id: ID!
   delegator: String!
   delegatee: String!
+  rewardsOrPenalties: BigDecimal!
   amount: BigInt!
   startTimestamp: BigInt!
   updatedTimestamp: BigInt!
   stopTimestamp: BigInt!
+  delegatorStats: UserStat!
+  delegateeStats: UserStat!
 }
 
 type DelegateWithdrawal @entity {
   id: ID!
-  deposited: BigInt!
   delegator: String!
   delegatee: String!
+  withdrawAmount: BigInt!
   delegatorRewardPenalty: BigDecimal!
   delegateFee: BigInt!
   timestamp: BigInt!
@@ -89,6 +99,8 @@ type DelegateWithdrawal @entity {
 
 type PortfolioStakeWithdrawal @entity {
   id: ID!
+  portfolio: VirtualPortfolio!
+  withdrawAmount: BigInt!
   deposited: BigInt!
   rewardPenalty: BigDecimal!
   timestamp: BigInt!
