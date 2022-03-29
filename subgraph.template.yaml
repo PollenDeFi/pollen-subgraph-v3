@@ -35,13 +35,13 @@ dataSources:
           handler: handleAssetAdded
         - event: AssetRemoved(indexed address)
           handler: handleAssetRemoved
-        - event: PortfolioCreated(indexed address,uint256,uint256[])
+        - event: PortfolioCreated(indexed address,uint256,uint256[],bool)
           handler: handlePortfolioCreated
         # - event: PortfolioClosed(indexed address)
         #   handler: handlePortfolioClosed
-        - event: PortfolioRebalanced(indexed address,uint256[],uint256)
+        - event: PortfolioRebalanced(indexed address,uint256[],uint256,uint256,uint256,bool)
           handler: handlePortfolioRebalanced
-        - event: Delegated(indexed address,indexed address,uint256)
+        - event: Delegated(indexed address,indexed address,uint256,bool)
           handler: handleDelegated
 
   - kind: ethereum/contract
@@ -63,8 +63,8 @@ dataSources:
         - name: Minter
           file: ./abis/Minter.json
       eventHandlers:
-        - event: WithdrawWithPenalty(indexed address,indexed address,uint256,uint256,uint256)
+        - event: WithdrawWithPenalty(indexed address,indexed address,uint256,uint256,uint256,bool)
           handler: handleWithdrawWithPenalty
-        - event: WithdrawWithReward(indexed address,indexed address,uint256,uint256,uint256)
+        - event: WithdrawWithReward(indexed address,indexed address,uint256,uint256,uint256,bool)
           handler: handleWithdrawWithReward
           

@@ -50,6 +50,25 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "weights",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "BenchmarkPortfolioCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "account",
         "type": "address"
       },
@@ -89,6 +108,12 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "Delegated",
@@ -96,21 +121,8 @@
   },
   {
     "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "rate",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "duration",
-        "type": "uint256"
-      }
-    ],
-    "name": "IssuanceRateChanged",
+    "inputs": [],
+    "name": "IssuanceScheduleSet",
     "type": "event"
   },
   {
@@ -215,9 +227,34 @@
         "internalType": "address",
         "name": "pollenTokenAddr",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "vePollenTokenAddr",
+        "type": "address"
       }
     ],
     "name": "PollenTokenSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "minBalancePolinator",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maxDelegation",
+        "type": "uint256"
+      }
+    ],
+    "name": "PortfolioBalanceLimitsSet",
     "type": "event"
   },
   {
@@ -253,6 +290,12 @@
         "internalType": "uint256[]",
         "name": "weights",
         "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "PortfolioCreated",
@@ -278,6 +321,24 @@
         "internalType": "uint256",
         "name": "portfolioValue",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "benchMarkValue",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "PortfolioRebalanced",
@@ -371,6 +432,19 @@
       {
         "indexed": false,
         "internalType": "uint256",
+        "name": "rebalanceMinPeriod",
+        "type": "uint256"
+      }
+    ],
+    "name": "RebalancePeriodSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
         "name": "newTimeLock",
         "type": "uint256"
       }
@@ -454,6 +528,12 @@
         "internalType": "uint256",
         "name": "delegateFee",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "WithdrawWithPenalty",
@@ -491,9 +571,28 @@
         "internalType": "uint256",
         "name": "delegateFee",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "WithdrawWithReward",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maxNumAssets",
+        "type": "uint256"
+      }
+    ],
+    "name": "maxNumAssetsSet",
     "type": "event"
   },
   {
@@ -577,11 +676,16 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "id",
+        "name": "amount",
         "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
-    "name": "claimTokens",
+    "name": "closeAndWithdraw",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -589,12 +693,12 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
+        "internalType": "uint256[]",
+        "name": "weights",
+        "type": "uint256[]"
       }
     ],
-    "name": "closeAndWithdraw",
+    "name": "createBenchMarkPortfolio",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -610,6 +714,11 @@
         "internalType": "uint256[]",
         "name": "weights",
         "type": "uint256[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "createPortfolio",
@@ -628,6 +737,11 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "delegatePollen",
@@ -691,6 +805,11 @@
         "internalType": "address",
         "name": "owner",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "delegator",
+        "type": "address"
       }
     ],
     "name": "getPortfolio",
@@ -707,7 +826,12 @@
       },
       {
         "internalType": "uint256",
-        "name": "deposit",
+        "name": "depositPLN",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "depositVePLN",
         "type": "uint256"
       },
       {
@@ -851,13 +975,18 @@
         "internalType": "address[]",
         "name": "owners",
         "type": "address[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "getTotalReward",
     "outputs": [
       {
         "internalType": "uint256[]",
-        "name": "portfolioReturn",
+        "name": "pReturns",
         "type": "uint256[]"
       },
       {
@@ -914,14 +1043,31 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "rate",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "duration",
-        "type": "uint256"
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "maxTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "offsetX",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "offsetY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rate",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IssuanceInfo[]",
+        "name": "schedule",
+        "type": "tuple[]"
       }
     ],
     "name": "initializeIssuanceInfo",
@@ -976,6 +1122,24 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "mintInflationReimburse",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
@@ -1002,6 +1166,11 @@
         "internalType": "uint256[]",
         "name": "amounts",
         "type": "uint256[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "multiDelegatePollen",
@@ -1057,11 +1226,29 @@
         "internalType": "uint256[]",
         "name": "weights",
         "type": "uint256[]"
+      }
+    ],
+    "name": "rebalanceBenchMarkPortfolio",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "weights",
+        "type": "uint256[]"
       },
       {
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "rebalancePortfolio",
@@ -1101,19 +1288,8 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "rate",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "duration",
-        "type": "uint256"
-      }
-    ],
-    "name": "setIssuanceRate",
+    "inputs": [],
+    "name": "renounceAdminRole",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1140,7 +1316,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_maxNumAssets",
+        "name": "maxNumAssets",
         "type": "uint256"
       }
     ],
@@ -1165,25 +1341,17 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_penaltyMultiplier",
-        "type": "uint256"
-      }
-    ],
-    "name": "setPenaltyMultiplier",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+        "internalType": "address",
+        "name": "pollenToken_",
+        "type": "address"
+      },
       {
         "internalType": "address",
-        "name": "pollen",
+        "name": "vePollenToken_",
         "type": "address"
       }
     ],
-    "name": "setPollenToken",
+    "name": "setPollenTokens",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1210,19 +1378,6 @@
       }
     ],
     "name": "setRebalancePeriod",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_rewardMultiplier",
-        "type": "uint256"
-      }
-    ],
-    "name": "setRewardMultiplier",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1282,6 +1437,29 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "tokenAddr",
+        "type": "address"
+      }
+    ],
+    "name": "transferFunds",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "newImplementation",
         "type": "address"
@@ -1318,11 +1496,6 @@
         "internalType": "bool",
         "name": "voteType",
         "type": "bool"
-      },
-      {
-        "internalType": "uint96",
-        "name": "amount",
-        "type": "uint96"
       }
     ],
     "name": "voteProposal",
@@ -1341,6 +1514,11 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "withdraw",
@@ -1359,6 +1537,11 @@
         "internalType": "uint256[]",
         "name": "amounts",
         "type": "uint256[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "withdrawMany",
@@ -1372,6 +1555,11 @@
         "internalType": "address",
         "name": "owner",
         "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "withdrawRewards",
@@ -1385,6 +1573,11 @@
         "internalType": "address[]",
         "name": "owners",
         "type": "address[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "withdrawRewardsMany",

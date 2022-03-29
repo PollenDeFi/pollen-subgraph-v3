@@ -127,19 +127,6 @@
         "type": "uint256"
       }
     ],
-    "name": "claimTokens",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      }
-    ],
     "name": "executeProposal",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -208,11 +195,6 @@
         "internalType": "bool",
         "name": "voteType",
         "type": "bool"
-      },
-      {
-        "internalType": "uint96",
-        "name": "amount",
-        "type": "uint96"
       }
     ],
     "name": "voteProposal",

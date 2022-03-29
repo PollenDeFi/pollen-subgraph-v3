@@ -1,5 +1,5 @@
 import { DailyChartItem, OverviewStat } from '../../generated/schema'
-import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
+import { BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { USER_OVERVIEW_STATS_ID } from './constants'
 
 export function getOrCreateOverviewStats(): OverviewStat {
@@ -7,8 +7,10 @@ export function getOrCreateOverviewStats(): OverviewStat {
 
   if (overviewStats == null) {
     overviewStats = new OverviewStat(USER_OVERVIEW_STATS_ID)
-    overviewStats.totalStaked = BigDecimal.zero()
-    overviewStats.totalPlnEarned = BigDecimal.zero()
+    overviewStats.totalPlnStaked = BigDecimal.zero()
+    overviewStats.totalVePlnStaked = BigDecimal.zero()
+    overviewStats.totalPlnEarnedBurned = BigDecimal.zero()
+    overviewStats.totalVePlnEarnedBurned = BigDecimal.zero()
     overviewStats.totalDelegated = BigDecimal.zero()
     overviewStats.assetManagers = []
     overviewStats.assetManagersCount = BigInt.zero()
@@ -23,12 +25,19 @@ export function getOrCreateOverviewStats(): OverviewStat {
 export function updatePollenatorOverviewStats(
   stake: BigDecimal,
   assetManagerAddress: string,
-  totalPlnEarned: BigDecimal,
+  rewardPenalty: BigDecimal,
+  isVePln: bool,
   timestamp: BigInt
 ): void {
   let overviewStats = getOrCreateOverviewStats()
 
-  overviewStats.totalStaked = overviewStats.totalStaked.plus(stake)
+  if (isVePln) {
+    overviewStats.totalVePlnStaked = overviewStats.totalVePlnStaked.plus(stake)
+    updateDailyChartItem(timestamp, 'TotalVePlnStaked', overviewStats.totalPlnStaked)
+  } else {
+    overviewStats.totalPlnStaked = overviewStats.totalPlnStaked.plus(stake)
+    updateDailyChartItem(timestamp, 'TotalPlnStaked', overviewStats.totalPlnStaked)
+  }
 
   let managers = overviewStats.assetManagers
   let isAssetManagerPresent = managers.includes(assetManagerAddress)
@@ -45,23 +54,45 @@ export function updatePollenatorOverviewStats(
     )
   }
 
-  overviewStats.totalPlnEarned = overviewStats.totalPlnEarned.plus(totalPlnEarned)
-  overviewStats.save()
+  if (isVePln && rewardPenalty.lt(BigDecimal.zero())) {
+    overviewStats.totalVePlnEarnedBurned = overviewStats.totalVePlnEarnedBurned.plus(
+      rewardPenalty
+    )
+    updateDailyChartItem(
+      timestamp,
+      'TotalProfitLossVePln',
+      overviewStats.totalVePlnEarnedBurned
+    )
+  } else {
+    overviewStats.totalPlnEarnedBurned = overviewStats.totalPlnEarnedBurned.plus(
+      rewardPenalty
+    )
+    updateDailyChartItem(
+      timestamp,
+      'TotalProfitLossPln',
+      overviewStats.totalPlnEarnedBurned
+    )
+  }
 
-  updateDailyChartItem(timestamp, 'TotalProfitLoss', overviewStats.totalPlnEarned)
-  updateDailyChartItem(timestamp, 'TotalStaked', overviewStats.totalStaked)
+  overviewStats.save()
 }
 
 export function updateDelegatorOverviewStats(
   stake: BigDecimal,
   delegatorAddress: string,
-  totalPlnEarned: BigDecimal,
+  rewardPenalty: BigDecimal,
   feesPaid: BigInt,
-  timestamp: BigInt
+  timestamp: BigInt,
+  isVePln: bool
 ): void {
   let overviewStats = getOrCreateOverviewStats()
 
-  overviewStats.totalStaked = overviewStats.totalStaked.plus(stake)
+  if (isVePln) {
+    overviewStats.totalVePlnStaked = overviewStats.totalVePlnStaked.plus(stake)
+  } else {
+    overviewStats.totalPlnStaked = overviewStats.totalPlnStaked.plus(stake)
+  }
+
   overviewStats.totalDelegated = overviewStats.totalDelegated.plus(stake)
   overviewStats.totalFeesPaid = overviewStats.totalFeesPaid.plus(feesPaid)
 
@@ -78,11 +109,27 @@ export function updateDelegatorOverviewStats(
     )
   }
 
-  overviewStats.totalPlnEarned = overviewStats.totalPlnEarned.plus(totalPlnEarned)
-  overviewStats.save()
+  if (isVePln && rewardPenalty.lt(BigDecimal.zero())) {
+    overviewStats.totalVePlnEarnedBurned = overviewStats.totalVePlnEarnedBurned.plus(
+      rewardPenalty
+    )
+    updateDailyChartItem(
+      timestamp,
+      'TotalProfitLossVePln',
+      overviewStats.totalVePlnEarnedBurned
+    )
+  } else {
+    overviewStats.totalPlnEarnedBurned = overviewStats.totalPlnEarnedBurned.plus(
+      rewardPenalty
+    )
+    updateDailyChartItem(
+      timestamp,
+      'TotalProfitLossPln',
+      overviewStats.totalPlnEarnedBurned
+    )
+  }
 
-  updateDailyChartItem(timestamp, 'TotalProfitLoss', overviewStats.totalPlnEarned)
-  updateDailyChartItem(timestamp, 'TotalStaked', overviewStats.totalStaked)
+  overviewStats.save()
 }
 
 export function updateDailyChartItem(

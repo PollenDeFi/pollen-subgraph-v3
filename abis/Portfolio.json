@@ -31,6 +31,25 @@
       {
         "indexed": true,
         "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "weights",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "BenchmarkPortfolioCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "delegator",
         "type": "address"
       },
@@ -45,9 +64,34 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "Delegated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "minBalancePolinator",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maxDelegation",
+        "type": "uint256"
+      }
+    ],
+    "name": "PortfolioBalanceLimitsSet",
     "type": "event"
   },
   {
@@ -83,6 +127,12 @@
         "internalType": "uint256[]",
         "name": "weights",
         "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "PortfolioCreated",
@@ -108,6 +158,24 @@
         "internalType": "uint256",
         "name": "portfolioValue",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "benchMarkValue",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "PortfolioRebalanced",
@@ -139,6 +207,32 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "rebalanceMinPeriod",
+        "type": "uint256"
+      }
+    ],
+    "name": "RebalancePeriodSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maxNumAssets",
+        "type": "uint256"
+      }
+    ],
+    "name": "maxNumAssetsSet",
+    "type": "event"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -154,6 +248,19 @@
   {
     "inputs": [
       {
+        "internalType": "uint256[]",
+        "name": "weights",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "createBenchMarkPortfolio",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
@@ -162,6 +269,11 @@
         "internalType": "uint256[]",
         "name": "weights",
         "type": "uint256[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "createPortfolio",
@@ -180,6 +292,11 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "delegatePollen",
@@ -206,6 +323,11 @@
         "internalType": "address",
         "name": "owner",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "delegator",
+        "type": "address"
       }
     ],
     "name": "getPortfolio",
@@ -222,7 +344,12 @@
       },
       {
         "internalType": "uint256",
-        "name": "deposit",
+        "name": "depositPLN",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "depositVePLN",
         "type": "uint256"
       },
       {
@@ -293,13 +420,18 @@
         "internalType": "address[]",
         "name": "owners",
         "type": "address[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "getTotalReward",
     "outputs": [
       {
         "internalType": "uint256[]",
-        "name": "portfolioReturn",
+        "name": "pReturns",
         "type": "uint256[]"
       },
       {
@@ -327,9 +459,27 @@
         "internalType": "uint256[]",
         "name": "amounts",
         "type": "uint256[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "multiDelegatePollen",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "weights",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "rebalanceBenchMarkPortfolio",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -345,6 +495,11 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "rebalancePortfolio",
@@ -387,7 +542,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_maxNumAssets",
+        "name": "maxNumAssets",
         "type": "uint256"
       }
     ],

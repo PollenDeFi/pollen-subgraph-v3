@@ -32,6 +32,7 @@ export function handlePortfolioCreated(event: PortfolioCreated): void {
     event.params.amount.toBigDecimal(),
     event.params.creator.toHexString(),
     BigDecimal.fromString('0'),
+    event.params.tokenType,
     event.block.timestamp
   )
 
@@ -40,6 +41,7 @@ export function handlePortfolioCreated(event: PortfolioCreated): void {
     event.params.creator,
     event.params.weights,
     event.params.amount,
+    event.params.tokenType,
     event.block.timestamp
   )
 }
@@ -82,9 +84,18 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
       existingPortfolio.rebalances = rebalances
       existingPortfolio.currentEntry = newEntry.id
     }
-    if (event.params.weights[0] !== BigInt.fromString('100')) {
-      existingPortfolio.isClosed = false
+
+    // Portfolio is considered closed when 100% USDT
+    existingPortfolio.isClosed = event.params.weights[0].equals(BigInt.fromI32(100))
+
+    if (event.params.tokenType) {
+      existingPortfolio.vePlnStake = existingPortfolio.vePlnStake.plus(
+        event.params.amount
+      )
+    } else {
+      existingPortfolio.plnStake = existingPortfolio.plnStake.plus(event.params.amount)
     }
+
     existingPortfolio.updatedTimestamp = event.block.timestamp
     existingPortfolio.save()
   } else {
@@ -129,11 +140,11 @@ export function handleDelegated(event: Delegated): void {
     // Delegating to yourself just means increasing your current stake
     let portfolio = VirtualPortfolio.load(delegatee)
     if (portfolio) {
-      let newStake = portfolio.pollenStake.plus(event.params.amount)
-      portfolio.pollenStake = newStake
+      let newStake = portfolio.plnStake.plus(event.params.amount)
+      portfolio.plnStake = newStake
       portfolio.updatedTimestamp = event.block.timestamp
       let delegateeStat = getOrCreateUserStat(delegatee)
-      delegateeStat.portfolioStake = newStake
+      delegateeStat.portfolioOpen = true
       delegateeStat.updatedTimestamp = event.block.timestamp
       delegateeStat.save()
       portfolio.save()
@@ -147,20 +158,29 @@ export function handleDelegated(event: Delegated): void {
     let delegatorStat = getOrCreateUserStat(delegator)
 
     if (delegation) {
-      if (delegation.amount.isZero()) {
+      if (delegation.plnAmount.isZero() && delegation.vePlnAmount.isZero()) {
         // Starting again after returning to zero
         delegation.startTimestamp = event.block.timestamp
       }
       delegation.updatedTimestamp = event.block.timestamp
-      delegation.amount = delegation.amount.plus(event.params.amount)
+      if (event.params.tokenType) {
+        delegation.vePlnAmount = delegation.vePlnAmount.plus(event.params.amount)
+      } else {
+        delegation.plnAmount = delegation.plnAmount.plus(event.params.amount)
+      }
     } else {
       delegation = new Delegation(id)
       delegation.delegateeStats = delegateeStat.id
       delegation.delegatorStats = delegatorStat.id
-      delegation.rewardsOrPenalties = BigDecimal.zero()
+      delegation.rewardsOrPenaltiesPln = BigDecimal.zero()
+      delegation.rewardsOrPenaltiesVePln = BigDecimal.zero()
       delegation.delegatee = delegatee
       delegation.delegator = delegator
-      delegation.amount = event.params.amount
+      if (event.params.tokenType) {
+        delegation.vePlnAmount = event.params.amount
+      } else {
+        delegation.plnAmount = event.params.amount
+      }
       delegation.startTimestamp = event.block.timestamp
       delegation.updatedTimestamp = event.block.timestamp
       delegateeStat.totalDelegators = delegateeStat.totalDelegators.plus(
@@ -171,12 +191,22 @@ export function handleDelegated(event: Delegated): void {
         BigInt.fromString('1')
       )
     }
-    delegatorStat.totalDelegatedTo = delegatorStat.totalDelegatedTo.plus(
-      event.params.amount
-    )
-    delegateeStat.totalDelegatedFrom = delegateeStat.totalDelegatedFrom.plus(
-      event.params.amount
-    )
+    if (event.params.tokenType) {
+      delegatorStat.totalVePlnDelegatedTo = delegatorStat.totalVePlnDelegatedTo.plus(
+        event.params.amount
+      )
+      delegateeStat.totalVePlnDelegatedFrom = delegateeStat.totalVePlnDelegatedFrom.plus(
+        event.params.amount
+      )
+    } else {
+      delegatorStat.totalPlnDelegatedTo = delegatorStat.totalPlnDelegatedTo.plus(
+        event.params.amount
+      )
+      delegateeStat.totalPlnDelegatedFrom = delegateeStat.totalPlnDelegatedFrom.plus(
+        event.params.amount
+      )
+    }
+
     delegateeStat.updatedTimestamp = event.block.timestamp
     delegatorStat.updatedTimestamp = event.block.timestamp
 
@@ -244,6 +274,7 @@ function updateUserStatsAfterRebalance(
   }
   userStat.totalRebalances = userStat.totalRebalances.plus(BigInt.fromI32(1))
   userStat.updatedTimestamp = timestamp
+  userStat.portfolioOpen = true
   userStat.save()
 }
 
@@ -254,7 +285,7 @@ function createPortfolioEntry(
   timestamp: BigInt
 ): PortfolioEntry | null {
   let contract = PortfolioContract.bind(contractAddress)
-  let storedPortfolio = contract.try_getPortfolio(creator)
+  let storedPortfolio = contract.try_getPortfolio(creator, creator)
 
   if (storedPortfolio.reverted) {
     log.error('Failed to fetch portfolio {}', [creator.toHexString()])
@@ -289,10 +320,11 @@ function createPortfolio(
   creator: Address,
   weights: BigInt[],
   stake: BigInt,
+  isVePln: bool,
   timestamp: BigInt
 ): void {
   let contract = PortfolioContract.bind(contractAddress)
-  let storedPortfolio = contract.try_getPortfolio(creator)
+  let storedPortfolio = contract.try_getPortfolio(creator, creator)
   let userAddr = creator.toHexString()
   let userStat = getOrCreateUserStat(userAddr)
 
@@ -303,13 +335,19 @@ function createPortfolio(
     if (portfolio == null) {
       portfolio = new VirtualPortfolio(userAddr)
       portfolio.assetsProfitOrLoss = []
-      portfolio.rewardsOrPenalties = BigDecimal.zero()
+      portfolio.rewardsOrPenaltiesPln = BigDecimal.zero()
+      portfolio.rewardsOrPenaltiesVePln = BigDecimal.zero()
       portfolio.owner = userAddr
       portfolio.updatedTimestamp = timestamp
       portfolio.openTimestamp = timestamp
-      portfolio.pollenStake = stake
       portfolio.ownerStats = userStat.id
       portfolio.rebalances = []
+
+      if (isVePln) {
+        portfolio.vePlnStake = stake
+      } else {
+        portfolio.plnStake = stake
+      }
     }
 
     let entry = createPortfolioEntry(contractAddress, creator, weights, timestamp)
@@ -325,7 +363,7 @@ function createPortfolio(
     portfolio.save()
 
     userStat.portfolio = portfolio.id
-    userStat.portfolioStake = stake
+    userStat.portfolioOpen = true
     userStat.updatedTimestamp = timestamp
     userStat.save()
   }

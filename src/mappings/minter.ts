@@ -25,6 +25,7 @@ export function handleWithdrawWithPenalty(event: WithdrawWithPenalty): void {
     event.params.delegateFee,
     event.params.portfolio,
     event.block.timestamp,
+    event.params.tokenType,
     true
   )
 }
@@ -40,6 +41,7 @@ export function handleWithdrawWithReward(event: WithdrawWithReward): void {
     event.params.delegateFee,
     event.params.portfolio,
     event.block.timestamp,
+    event.params.tokenType,
     false
   )
 }
@@ -52,6 +54,7 @@ function handleWithdraw(
   fee: BigInt,
   portfolioOwner: Address,
   timestamp: BigInt,
+  isVePln: boolean,
   isPenalty: boolean
 ): void {
   log.info('Withdrawing stake {} {}', [user, owner, withdrawAmount.toString()])
@@ -66,30 +69,59 @@ function handleWithdraw(
     // User withdrawing thier own portfolio stake
     let id = owner + '-portfolio-withdraw-' + timestamp.toString()
     let withdrawal = new PortfolioStakeWithdrawal(id)
-    withdrawal.rewardPenalty = rewardPenaltyDecimal
+    if (isVePln) {
+      withdrawal.rewardPenaltyVePln = rewardPenaltyDecimal
+    } else {
+      withdrawal.rewardPenaltyPln = rewardPenaltyDecimal
+    }
     withdrawal.withdrawAmount = withdrawAmount
     withdrawal.portfolio = portfolioOwner.toHexString()
     withdrawal.timestamp = timestamp
+    withdrawal.tokenType = isVePln ? 'vepln' : 'pln'
     let portfolio = VirtualPortfolio.load(owner)
 
     if (portfolio !== null) {
       log.info('Withdrawing from portfolio {}', [owner])
-      portfolio.rewardsOrPenalties = portfolio.rewardsOrPenalties.plus(
-        rewardPenaltyDecimal
-      )
+      if (isVePln && isPenalty) {
+        portfolio.rewardsOrPenaltiesVePln = portfolio.rewardsOrPenaltiesVePln.plus(
+          rewardPenaltyDecimal
+        )
+        delegateeStat.rewardsOrPenaltiesVePln = delegateeStat.rewardsOrPenaltiesVePln.plus(
+          rewardPenaltyDecimal
+        )
+      } else {
+        delegateeStat.rewardsOrPenaltiesPln = delegateeStat.rewardsOrPenaltiesPln.plus(
+          rewardPenaltyDecimal
+        )
+        portfolio.rewardsOrPenaltiesPln = portfolio.rewardsOrPenaltiesPln.plus(
+          rewardPenaltyDecimal
+        )
+      }
+
       portfolio.updatedTimestamp = timestamp
-      portfolio.pollenStake = portfolio.pollenStake.minus(withdrawAmount)
+      if (isVePln) {
+        portfolio.vePlnStake = portfolio.vePlnStake.minus(withdrawAmount)
+      } else {
+        portfolio.plnStake = portfolio.plnStake.minus(withdrawAmount)
+      }
+      if (portfolio.plnStake.isZero() && portfolio.vePlnStake.isZero()) {
+        delegateeStat.portfolioOpen = false
+      }
       portfolio.save()
     }
-    delegateeStat.portfolioStake = delegateeStat.portfolioStake.minus(withdrawAmount)
-    delegateeStat.pollenPnl = delegateeStat.pollenPnl.plus(rewardPenaltyDecimal)
     log.info('Updating pnl stat {} {}', [
       rewardPenaltyDecimal.toString(),
-      delegateeStat.pollenPnl.toString(),
+      delegateeStat.rewardsOrPenaltiesPln.toString(),
     ])
     withdrawal.save()
     let stakeRemoved = withdrawAmount.toBigDecimal().neg()
-    updatePollenatorOverviewStats(stakeRemoved, owner, rewardPenaltyDecimal, timestamp)
+    updatePollenatorOverviewStats(
+      stakeRemoved,
+      owner,
+      rewardPenaltyDecimal,
+      isVePln,
+      timestamp
+    )
   } else {
     // Delegator withdrawing thier delegation stake
     let id = user + '-delegate-withdraw-' + timestamp.toString()
@@ -97,10 +129,24 @@ function handleWithdraw(
     withdrawal.withdrawAmount = withdrawAmount
     withdrawal.delegatee = owner
     withdrawal.delegator = user
-    withdrawal.delegatorRewardPenalty = rewardPenalty.toBigDecimal()
+    withdrawal.tokenType = isVePln ? 'vepln' : 'pln'
+
+    if (isVePln && isPenalty) {
+      withdrawal.delegatorRewardPenaltyVePln = rewardPenalty.toBigDecimal()
+    } else {
+      withdrawal.delegatorRewardPenaltyPln = rewardPenalty.toBigDecimal()
+    }
     withdrawal.delegateFee = fee
     withdrawal.timestamp = timestamp
-    delegatorStat.totalDelegatedTo = delegatorStat.totalDelegatedTo.minus(withdrawAmount)
+    if (isVePln) {
+      delegatorStat.totalVePlnDelegatedTo = delegatorStat.totalVePlnDelegatedTo.minus(
+        withdrawAmount
+      )
+    } else {
+      delegatorStat.totalPlnDelegatedTo = delegatorStat.totalPlnDelegatedTo.minus(
+        withdrawAmount
+      )
+    }
     delegatorStat.totalDelegationFeesPaid = delegatorStat.totalDelegationFeesPaid.plus(
       fee
     )
@@ -115,27 +161,50 @@ function handleWithdraw(
     let delegation = Delegation.load(delegationId)
     if (delegation) {
       log.info('Removing amount from delegation {}', [delegationId])
-      delegation.amount = delegation.amount.minus(withdrawAmount)
-      delegation.rewardsOrPenalties = delegation.rewardsOrPenalties.plus(
-        rewardPenaltyDecimal
-      )
+      if (isVePln) {
+        delegation.vePlnAmount = delegation.vePlnAmount.minus(withdrawAmount)
+        delegateeStat.totalVePlnDelegatedFrom = delegateeStat.totalVePlnDelegatedFrom.minus(
+          withdrawAmount
+        )
+      } else {
+        delegation.plnAmount = delegation.plnAmount.minus(withdrawAmount)
+        delegateeStat.totalPlnDelegatedFrom = delegateeStat.totalPlnDelegatedFrom.minus(
+          withdrawAmount
+        )
+      }
+      if (isVePln && isPenalty) {
+        delegation.rewardsOrPenaltiesVePln = delegation.rewardsOrPenaltiesVePln.plus(
+          rewardPenaltyDecimal
+        )
+      } else {
+        delegation.rewardsOrPenaltiesPln = delegation.rewardsOrPenaltiesPln.plus(
+          rewardPenaltyDecimal
+        )
+      }
+
       delegation.updatedTimestamp = timestamp
       delegation.save()
-      if (withdrawAmount.equals(delegation.amount)) {
+      let bal = isVePln ? delegation.vePlnAmount : delegation.plnAmount
+      if (withdrawAmount.equals(bal)) {
         delegateeStat.totalDelegators = delegateeStat.totalDelegators.minus(
           BigInt.fromString('1')
         )
       }
-      delegateeStat.totalDelegatedFrom = delegateeStat.totalDelegatedFrom.minus(
-        withdrawAmount
-      )
+
       delegateeStat.save()
     } else {
       log.info('Delegation not found {}', [delegationId])
     }
     withdrawal.save()
     let stakeRemoved = withdrawAmount.toBigDecimal().neg()
-    updateDelegatorOverviewStats(stakeRemoved, user, rewardPenaltyDecimal, fee, timestamp)
+    updateDelegatorOverviewStats(
+      stakeRemoved,
+      user,
+      rewardPenaltyDecimal,
+      fee,
+      timestamp,
+      isVePln
+    )
   }
   delegateeStat.updatedTimestamp = timestamp
   delegatorStat.updatedTimestamp = timestamp

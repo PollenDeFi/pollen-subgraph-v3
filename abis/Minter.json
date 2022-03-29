@@ -1,21 +1,8 @@
 [
   {
     "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "rate",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "duration",
-        "type": "uint256"
-      }
-    ],
-    "name": "IssuanceRateChanged",
+    "inputs": [],
+    "name": "IssuanceScheduleSet",
     "type": "event"
   },
   {
@@ -50,6 +37,12 @@
         "internalType": "uint256",
         "name": "delegateFee",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "WithdrawWithPenalty",
@@ -87,6 +80,12 @@
         "internalType": "uint256",
         "name": "delegateFee",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "WithdrawWithReward",
@@ -98,6 +97,11 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "closeAndWithdraw",
@@ -108,14 +112,31 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "rate",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "duration",
-        "type": "uint256"
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "maxTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "offsetX",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "offsetY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rate",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct MinterModuleStorage.IssuanceInfo[]",
+        "name": "schedule",
+        "type": "tuple[]"
       }
     ],
     "name": "initializeIssuanceInfo",
@@ -126,17 +147,17 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "rate",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
       },
       {
         "internalType": "uint256",
-        "name": "duration",
+        "name": "amount",
         "type": "uint256"
       }
     ],
-    "name": "setIssuanceRate",
+    "name": "mintInflationReimburse",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -157,32 +178,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_penaltyMultiplier",
-        "type": "uint256"
-      }
-    ],
-    "name": "setPenaltyMultiplier",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_rewardMultiplier",
-        "type": "uint256"
-      }
-    ],
-    "name": "setRewardMultiplier",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "owner",
         "type": "address"
@@ -191,6 +186,11 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "withdraw",
@@ -209,6 +209,11 @@
         "internalType": "uint256[]",
         "name": "amounts",
         "type": "uint256[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "withdrawMany",
@@ -222,6 +227,11 @@
         "internalType": "address",
         "name": "owner",
         "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "withdrawRewards",
@@ -235,6 +245,11 @@
         "internalType": "address[]",
         "name": "owners",
         "type": "address[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
       }
     ],
     "name": "withdrawRewardsMany",

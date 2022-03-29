@@ -96,9 +96,15 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "address",
         "name": "pollenTokenAddr",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "vePollenTokenAddr",
         "type": "address"
       }
     ],
@@ -141,14 +147,26 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "renounceAdminRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
-        "name": "pollen",
+        "name": "pollenToken_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "vePollenToken_",
         "type": "address"
       }
     ],
-    "name": "setPollenToken",
+    "name": "setPollenTokens",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

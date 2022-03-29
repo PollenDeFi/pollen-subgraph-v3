@@ -6,14 +6,17 @@ export function getOrCreateUserStat(address: string): UserStat {
   if (stat == null) {
     stat = new UserStat(address)
     stat.address = address
-    stat.totalDelegatedTo = BigInt.zero()
-    stat.totalDelegatedFrom = BigInt.zero()
+    stat.totalPlnDelegatedTo = BigInt.zero()
+    stat.totalVePlnDelegatedTo = BigInt.zero()
+    stat.totalPlnDelegatedFrom = BigInt.zero()
+    stat.totalVePlnDelegatedFrom = BigInt.zero()
     stat.totalDelegators = BigInt.zero()
     stat.reputation = BigDecimal.fromString('100')
-    stat.pollenPnl = BigDecimal.zero()
+    stat.rewardsOrPenaltiesPln = BigDecimal.zero()
+    stat.rewardsOrPenaltiesVePln = BigDecimal.zero()
     stat.totalRewardsForDelegators = BigDecimal.zero()
     stat.totalRebalances = BigInt.fromI32(0)
-    stat.portfolioStake = BigInt.fromI32(0)
+    stat.portfolioOpen = false
     stat.save()
   }
   return stat as UserStat

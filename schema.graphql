@@ -1,3 +1,19 @@
+enum PollenTokenType {
+  pln
+  vepln
+}
+
+enum ChartType {
+  PortfolioManagers
+  TotalPlnStaked
+  TotalVePlnStaked
+  TotalProfitLossPln
+  TotalProfitLossVePln
+  Delegators
+  TotalVePlnDelegated
+  TotalPlnDelegated
+}
+
 type Asset @entity {
   id: ID!
   name: String!
@@ -39,8 +55,10 @@ type VirtualPortfolio @entity {
   currentEntry: PortfolioEntry
   isClosed: Boolean!
   rebalances: [PortfolioEntry!]!
-  pollenStake: BigInt!
-  rewardsOrPenalties: BigDecimal!
+  plnStake: BigInt!
+  vePlnStake: BigInt!
+  rewardsOrPenaltiesPln: BigDecimal!
+  rewardsOrPenaltiesVePln: BigDecimal!
   assetsProfitOrLoss: [AssetProfitOrLoss!]!
   ownerStats: UserStat!
 }
@@ -48,17 +66,20 @@ type VirtualPortfolio @entity {
 type UserStat @entity {
   id: ID!
   address: String!
-  totalDelegatedTo: BigInt!
-  totalDelegatedFrom: BigInt!
+  totalPlnDelegatedTo: BigInt!
+  totalPlnDelegatedFrom: BigInt!
+  totalVePlnDelegatedTo: BigInt!
+  totalVePlnDelegatedFrom: BigInt!
   totalDelegators: BigInt!
   reputation: BigDecimal!
-  pollenPnl: BigDecimal!
+  rewardsOrPenaltiesPln: BigDecimal!
+  rewardsOrPenaltiesVePln: BigDecimal!
   totalRebalances: BigInt!
   totalDelegationFeesEarned: BigInt!
   totalDelegationFeesPaid: BigInt!
   totalRewardsForDelegators: BigDecimal!
   portfolio: VirtualPortfolio
-  portfolioStake: BigInt!
+  portfolioOpen: Boolean!
   updatedTimestamp: BigInt
 }
 
@@ -69,8 +90,10 @@ type OverviewStat @entity {
   delegators: [String!]!
   delegatorsCount: BigInt!
   totalDelegated: BigDecimal!
-  totalStaked: BigDecimal!
-  totalPlnEarned: BigDecimal!
+  totalVePlnStaked: BigDecimal!
+  totalPlnStaked: BigDecimal!
+  totalPlnEarnedBurned: BigDecimal!
+  totalVePlnEarnedBurned: BigDecimal!
   totalFeesPaid: BigInt!
 }
 
@@ -78,8 +101,10 @@ type Delegation @entity {
   id: ID!
   delegator: String!
   delegatee: String!
-  rewardsOrPenalties: BigDecimal!
-  amount: BigInt!
+  rewardsOrPenaltiesPln: BigDecimal!
+  rewardsOrPenaltiesVePln: BigDecimal!
+  plnAmount: BigInt!
+  vePlnAmount: BigInt!
   startTimestamp: BigInt!
   updatedTimestamp: BigInt!
   stopTimestamp: BigInt!
@@ -92,9 +117,11 @@ type DelegateWithdrawal @entity {
   delegator: String!
   delegatee: String!
   withdrawAmount: BigInt!
-  delegatorRewardPenalty: BigDecimal!
+  delegatorRewardPenaltyPln: BigDecimal!
+  delegatorRewardPenaltyVePln: BigDecimal!
   delegateFee: BigInt!
   timestamp: BigInt!
+  tokenType: PollenTokenType!
 }
 
 type PortfolioStakeWithdrawal @entity {
@@ -102,16 +129,10 @@ type PortfolioStakeWithdrawal @entity {
   portfolio: VirtualPortfolio!
   withdrawAmount: BigInt!
   deposited: BigInt!
-  rewardPenalty: BigDecimal!
+  rewardPenaltyPln: BigDecimal!
+  rewardPenaltyVePln: BigDecimal!
   timestamp: BigInt!
-}
-
-enum ChartType {
-  PortfolioManagers
-  TotalStaked
-  TotalProfitLoss
-  Delegators
-  TotalDelegated
+  tokenType: PollenTokenType!
 }
 
 type DailyChartItem @entity {
