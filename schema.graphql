@@ -61,6 +61,7 @@ type VirtualPortfolio @entity {
   rewardsOrPenaltiesVePln: BigDecimal!
   assetsProfitOrLoss: [AssetProfitOrLoss!]!
   ownerStats: UserStat!
+  isBenchmark: Boolean!
 }
 
 type UserStat @entity {

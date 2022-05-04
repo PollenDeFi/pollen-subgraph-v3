@@ -7,6 +7,7 @@ import {
   AssetAdded,
   AssetRemoved,
   Delegated,
+  BenchmarkPortfolioCreated,
 } from '../../generated/Portfolio/Portfolio'
 import { Quoter } from '../../generated/Portfolio/Quoter'
 import { ERC20 } from '../../generated/Portfolio/ERC20'
@@ -43,6 +44,18 @@ export function handlePortfolioCreated(event: PortfolioCreated): void {
     event.params.amount,
     event.params.tokenType,
     event.block.timestamp
+  )
+}
+
+export function handleBenchmarkCreated(event: BenchmarkPortfolioCreated): void {
+  createPortfolio(
+    event.address,
+    event.params.creator,
+    event.params.weights,
+    BigInt.zero(),
+    false,
+    event.block.timestamp,
+    true
   )
 }
 
@@ -321,7 +334,8 @@ function createPortfolio(
   weights: BigInt[],
   stake: BigInt,
   isVePln: bool,
-  timestamp: BigInt
+  timestamp: BigInt,
+  isBenchmark: boolean = false
 ): void {
   let contract = PortfolioContract.bind(contractAddress)
   let storedPortfolio = contract.try_getPortfolio(creator, creator)
@@ -342,6 +356,7 @@ function createPortfolio(
       portfolio.openTimestamp = timestamp
       portfolio.ownerStats = userStat.id
       portfolio.rebalances = []
+      portfolio.isBenchmark = isBenchmark
 
       if (isVePln) {
         portfolio.vePlnStake = stake
