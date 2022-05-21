@@ -6,6 +6,8 @@ import {
   PortfolioStakeWithdrawal,
   VirtualPortfolio,
   Delegation,
+  PortfolioEvent,
+  DelegationEvent,
 } from '../../generated/schema'
 import {
   updateDelegatorOverviewStats,
@@ -23,7 +25,6 @@ export function handleWithdrawWithPenalty(event: WithdrawWithPenalty): void {
     event.params.amount,
     event.params.penalty,
     event.params.delegateFee,
-    event.params.portfolio,
     event.block.timestamp,
     event.params.tokenType,
     true
@@ -39,7 +40,6 @@ export function handleWithdrawWithReward(event: WithdrawWithReward): void {
     event.params.amount,
     event.params.reward,
     event.params.delegateFee,
-    event.params.portfolio,
     event.block.timestamp,
     event.params.tokenType,
     false
@@ -52,7 +52,6 @@ function handleWithdraw(
   withdrawAmount: BigInt,
   rewardPenalty: BigInt,
   fee: BigInt,
-  portfolioOwner: Address,
   timestamp: BigInt,
   isVePln: boolean,
   isPenalty: boolean
@@ -75,9 +74,18 @@ function handleWithdraw(
       withdrawal.rewardPenaltyPln = rewardPenaltyDecimal
     }
     withdrawal.withdrawAmount = withdrawAmount
-    withdrawal.portfolio = portfolioOwner.toHexString()
+    withdrawal.user = user
     withdrawal.timestamp = timestamp
     withdrawal.tokenType = isVePln ? 'vepln' : 'pln'
+    withdrawal.save()
+
+    let withdrawEvent = new PortfolioEvent('withdrawal-' + user + timestamp.toString())
+    withdrawEvent.user = user
+    withdrawEvent.timestamp = timestamp
+    withdrawEvent.type = 'portfolio_withdrawal'
+    withdrawEvent.portfolioWithdrawal = withdrawal.id
+    withdrawEvent.save()
+
     let portfolio = VirtualPortfolio.load(owner)
 
     if (portfolio !== null) {
@@ -113,7 +121,6 @@ function handleWithdraw(
       rewardPenaltyDecimal.toString(),
       delegateeStat.rewardsOrPenaltiesPln.toString(),
     ])
-    withdrawal.save()
     let stakeRemoved = withdrawAmount.toBigDecimal().neg()
     updatePollenatorOverviewStats(
       stakeRemoved,
@@ -130,6 +137,14 @@ function handleWithdraw(
     withdrawal.delegatee = owner
     withdrawal.delegator = user
     withdrawal.tokenType = isVePln ? 'vepln' : 'pln'
+
+    let withdrawEvent = new DelegationEvent('withdrawal-' + user + timestamp.toString())
+    withdrawEvent.delegator = user
+    withdrawEvent.delegatee = owner
+    withdrawEvent.timestamp = timestamp
+    withdrawEvent.type = 'delegate_withdrawal'
+    withdrawEvent.delegateWithdrawal = withdrawal.id
+    withdrawEvent.save()
 
     if (isVePln && isPenalty) {
       withdrawal.delegatorRewardPenaltyVePln = rewardPenalty.toBigDecimal()

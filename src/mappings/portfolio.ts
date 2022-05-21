@@ -19,6 +19,10 @@ import {
   PortfolioEntry,
   Delegation,
   AssetProfitOrLoss,
+  DelegateDeposit,
+  PortfolioDeposit,
+  PortfolioEvent,
+  DelegationEvent,
 } from '../../generated/schema'
 
 import { getOrCreateUserStat } from '../utils/UserStat'
@@ -63,10 +67,36 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
   let userAddr = event.params.creator.toHexString()
   log.info('Rebalancing Portfolio, {}', [userAddr])
   let existingPortfolio = VirtualPortfolio.load(userAddr)
+
+  if (event.params.amount.gt(BigInt.zero())) {
+    let deposit = new PortfolioDeposit(userAddr + event.block.number.toString())
+    deposit.amount = event.params.amount
+    deposit.user = userAddr
+    deposit.tokenType = event.params.tokenType ? 'vepln' : 'pln'
+    deposit.timestamp = event.block.timestamp
+    deposit.save()
+
+    let depositEvent = new PortfolioEvent(
+      'deposit-' + userAddr + event.block.timestamp.toString()
+    )
+    depositEvent.user = userAddr
+    depositEvent.timestamp = event.block.timestamp
+    depositEvent.type = 'portfolio_deposit'
+    depositEvent.portfolioDeposit = deposit.id
+    depositEvent.save()
+  }
+
   if (existingPortfolio !== null) {
+    if (event.params.tokenType) {
+      existingPortfolio.vePlnStake = existingPortfolio.vePlnStake.plus(
+        event.params.amount
+      )
+    } else {
+      existingPortfolio.plnStake = existingPortfolio.plnStake.plus(event.params.amount)
+    }
+
     if (existingPortfolio.currentEntry !== null) {
       let currentEntry = PortfolioEntry.load(existingPortfolio.currentEntry!)!
-
       for (let i = 0; i < currentEntry.allocations.length; i++) {
         let allocation = PortfolioAllocation.load(currentEntry.allocations[i])!
         let asset = Asset.load(allocation.asset)!
@@ -75,7 +105,8 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
         asset.totalAllocation = asset.totalAllocation.minus(allocation.weight)
         asset.save()
       }
-
+      currentEntry.plnStake = existingPortfolio.plnStake
+      currentEntry.vePlnStake = existingPortfolio.vePlnStake
       currentEntry.closingValue = event.params.portfolioValue
       currentEntry.closedTimestamp = event.block.timestamp
 
@@ -88,6 +119,8 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
       event.address,
       event.params.creator,
       event.params.weights,
+      existingPortfolio.plnStake,
+      existingPortfolio.vePlnStake,
       event.block.timestamp
     )
 
@@ -96,18 +129,19 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
       rebalances.push(newEntry.id)
       existingPortfolio.rebalances = rebalances
       existingPortfolio.currentEntry = newEntry.id
+
+      let rebalanceEvent = new PortfolioEvent(
+        'rebalance-' + userAddr + event.block.timestamp.toString()
+      )
+      rebalanceEvent.user = userAddr
+      rebalanceEvent.timestamp = event.block.timestamp
+      rebalanceEvent.type = 'portfolio_rebalance'
+      rebalanceEvent.portfolioRebalance = newEntry.id
+      rebalanceEvent.save()
     }
 
     // Portfolio is considered closed when 100% USDT
     existingPortfolio.isClosed = event.params.weights[0].equals(BigInt.fromI32(100))
-
-    if (event.params.tokenType) {
-      existingPortfolio.vePlnStake = existingPortfolio.vePlnStake.plus(
-        event.params.amount
-      )
-    } else {
-      existingPortfolio.plnStake = existingPortfolio.plnStake.plus(event.params.amount)
-    }
 
     existingPortfolio.updatedTimestamp = event.block.timestamp
     existingPortfolio.save()
@@ -162,6 +196,22 @@ export function handleDelegated(event: Delegated): void {
       delegateeStat.save()
       portfolio.save()
     }
+
+    let deposit = new PortfolioDeposit(delegator + event.block.number.toString())
+    deposit.amount = event.params.amount
+    deposit.user = delegator
+    deposit.tokenType = event.params.tokenType ? 'vepln' : 'pln'
+    deposit.timestamp = event.block.timestamp
+    deposit.save()
+
+    let depositEvent = new PortfolioEvent(
+      'deposit-' + delegator + event.block.timestamp.toString()
+    )
+    depositEvent.user = delegator
+    depositEvent.timestamp = event.block.timestamp
+    depositEvent.type = 'portfolio_deposit'
+    depositEvent.portfolioDeposit = deposit.id
+    depositEvent.save()
   } else {
     // Delegating to someone else
     let id = delegator + '-' + delegatee
@@ -169,6 +219,24 @@ export function handleDelegated(event: Delegated): void {
     let delegation = Delegation.load(id)
     let delegateeStat = getOrCreateUserStat(delegatee)
     let delegatorStat = getOrCreateUserStat(delegator)
+
+    let deposit = new DelegateDeposit(id + event.block.number.toString())
+    deposit.amount = event.params.amount
+    deposit.delegatee = delegatee
+    deposit.delegator = delegator
+    deposit.tokenType = event.params.tokenType ? 'vepln' : 'pln'
+    deposit.timestamp = event.block.timestamp
+    deposit.save()
+
+    let depositEvent = new DelegationEvent(
+      'deposit-' + id + event.block.number.toString()
+    )
+    depositEvent.delegatee = delegatee
+    depositEvent.delegator = delegator
+    depositEvent.timestamp = event.block.timestamp
+    depositEvent.type = 'delegate_deposit'
+    depositEvent.delegateDeposit = deposit.id
+    depositEvent.save()
 
     if (delegation) {
       if (delegation.plnAmount.isZero() && delegation.vePlnAmount.isZero()) {
@@ -295,6 +363,8 @@ function createPortfolioEntry(
   contractAddress: Address,
   creator: Address,
   weights: BigInt[],
+  plnStake: BigInt,
+  vePlnStake: BigInt,
   timestamp: BigInt
 ): PortfolioEntry | null {
   let contract = PortfolioContract.bind(contractAddress)
@@ -307,6 +377,8 @@ function createPortfolioEntry(
     let entry = new PortfolioEntry(creator.toHexString() + '-' + timestamp.toHexString())
 
     entry.createdTimestamp = timestamp
+    entry.plnStake = plnStake
+    entry.vePlnStake = vePlnStake
 
     let assetAmounts = storedPortfolio.value.value0
     let assets = contract.getAssets()
@@ -365,7 +437,14 @@ function createPortfolio(
       }
     }
 
-    let entry = createPortfolioEntry(contractAddress, creator, weights, timestamp)
+    let entry = createPortfolioEntry(
+      contractAddress,
+      creator,
+      weights,
+      portfolio.vePlnStake,
+      portfolio.plnStake,
+      timestamp
+    )
 
     if (entry) {
       portfolio.currentEntry = entry.id
@@ -373,6 +452,15 @@ function createPortfolio(
       let rebalances = portfolio.rebalances
       rebalances.push(entry.id)
       portfolio.rebalances = rebalances
+
+      let rebalanceEvent = new PortfolioEvent(
+        'rebalance-' + userAddr + timestamp.toString()
+      )
+      rebalanceEvent.user = userAddr
+      rebalanceEvent.timestamp = timestamp
+      rebalanceEvent.type = 'portfolio_rebalance'
+      rebalanceEvent.portfolioRebalance = entry.id
+      rebalanceEvent.save()
     }
     portfolio.isClosed = false
     portfolio.save()

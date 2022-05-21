@@ -129,6 +129,12 @@ export function updateDelegatorOverviewStats(
     )
   }
 
+  updateDailyChartItem(
+    timestamp,
+    'TotalDelegationFeesPaid',
+    overviewStats.totalFeesPaid.toBigDecimal()
+  )
+
   overviewStats.save()
 }
 

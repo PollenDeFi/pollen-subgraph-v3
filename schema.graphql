@@ -12,6 +12,7 @@ enum ChartType {
   Delegators
   TotalVePlnDelegated
   TotalPlnDelegated
+  TotalDelegationFeesPaid
 }
 
 type Asset @entity {
@@ -40,6 +41,8 @@ type AssetProfitOrLoss @entity {
 
 type PortfolioEntry @entity {
   id: ID!
+  plnStake: BigInt!
+  vePlnStake: BigInt!
   initialValue: BigInt!
   closingValue: BigInt
   allocations: [PortfolioAllocation!]!
@@ -113,6 +116,15 @@ type Delegation @entity {
   delegateeStats: UserStat!
 }
 
+type DelegateDeposit @entity {
+  id: ID!
+  delegator: String!
+  delegatee: String!
+  amount: BigInt!
+  timestamp: BigInt!
+  tokenType: PollenTokenType!
+}
+
 type DelegateWithdrawal @entity {
   id: ID!
   delegator: String!
@@ -125,9 +137,17 @@ type DelegateWithdrawal @entity {
   tokenType: PollenTokenType!
 }
 
+type PortfolioDeposit @entity {
+  id: ID!
+  user: String!
+  amount: BigInt!
+  timestamp: BigInt!
+  tokenType: PollenTokenType!
+}
+
 type PortfolioStakeWithdrawal @entity {
   id: ID!
-  portfolio: VirtualPortfolio!
+  user: String!
   withdrawAmount: BigInt!
   deposited: BigInt!
   rewardPenaltyPln: BigDecimal!
@@ -141,4 +161,35 @@ type DailyChartItem @entity {
   type: ChartType!
   value: BigDecimal!
   timestamp: BigInt!
+}
+
+enum PortfolioEventType {
+  portfolio_deposit
+  portfolio_withdrawal
+  portfolio_rebalance
+}
+
+enum DelegationEventType {
+  delegate_deposit
+  delegate_withdrawal
+}
+
+type PortfolioEvent @entity {
+  id: ID!
+  type: PortfolioEventType!
+  user: String!
+  timestamp: BigInt!
+  portfolioDeposit: PortfolioDeposit
+  portfolioWithdrawal: PortfolioStakeWithdrawal
+  portfolioRebalance: PortfolioEntry
+}
+
+type DelegationEvent @entity {
+  id: ID!
+  type: DelegationEventType!
+  timestamp: BigInt!
+  delegator: String!
+  delegatee: String!
+  delegateDeposit: DelegateDeposit
+  delegateWithdrawal: DelegateWithdrawal
 }
