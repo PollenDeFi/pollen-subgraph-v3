@@ -673,6 +673,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "calculateMaxAllocation",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -776,6 +789,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getBenchMarkValue",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint8",
@@ -838,6 +864,11 @@
         "internalType": "bool",
         "name": "isOpen",
         "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "benchMarkRef",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1131,7 +1162,7 @@
         "type": "uint256"
       }
     ],
-    "name": "mintInflationReimburse",
+    "name": "mintRewards",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1186,6 +1217,55 @@
         "internalType": "address",
         "name": "plnTokenAddress",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "tokenType",
+        "type": "bool"
+      }
+    ],
+    "name": "preprocessWithdrawal",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "currentValue",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deposited",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balance",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "r",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isPositive",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "benchMarkVal",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1298,7 +1378,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "minBalancePolinator",
+        "name": "minBalancePollinator",
         "type": "uint256"
       },
       {

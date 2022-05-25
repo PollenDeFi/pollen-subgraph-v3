@@ -109,25 +109,6 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
         "name": "from",
         "type": "address"
       },
@@ -165,12 +146,38 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "inflationReimbourse",
+        "name": "claimable",
         "type": "uint256"
       }
     ],
     "name": "UnLocked",
     "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_REWARDS_FUNDS",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "TOTAL_REWARD_PER_SECOND",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [
@@ -259,6 +266,32 @@
   },
   {
     "inputs": [],
+    "name": "claimRewards",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "claims",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "decimals",
     "outputs": [
       {
@@ -327,6 +360,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getClaimableRewards",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -383,30 +429,7 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "inflationInfo",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "reserved",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "supply",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      },
       {
         "internalType": "uint256",
         "name": "amount",
@@ -435,12 +458,27 @@
     "outputs": [
       {
         "internalType": "uint256",
+        "name": "lockStart",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
         "name": "lockEnd",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
         "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "offset",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "claimable",
         "type": "uint256"
       }
     ],
@@ -462,22 +500,49 @@
   },
   {
     "inputs": [],
-    "name": "owner",
+    "name": "rewardCurve",
     "outputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "offsetX",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "offsetY",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "sumBias",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "stakeInfo",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "offsetY",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -569,19 +634,6 @@
         "type": "bool"
       }
     ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "transferOwnership",
-    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },

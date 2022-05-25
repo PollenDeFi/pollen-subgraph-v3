@@ -318,6 +318,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getBenchMarkValue",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -356,6 +369,11 @@
         "internalType": "bool",
         "name": "isOpen",
         "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "benchMarkRef",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -524,7 +542,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "minBalancePolinator",
+        "name": "minBalancePollinator",
         "type": "uint256"
       },
       {

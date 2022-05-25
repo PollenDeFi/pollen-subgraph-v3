@@ -48,6 +48,7 @@ type PortfolioEntry @entity {
   allocations: [PortfolioAllocation!]!
   createdTimestamp: BigInt!
   closedTimestamp: BigInt
+  benchmarkValue: BigInt!
 }
 
 type VirtualPortfolio @entity {

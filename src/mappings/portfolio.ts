@@ -376,6 +376,14 @@ function createPortfolioEntry(
   } else {
     let entry = new PortfolioEntry(creator.toHexString() + '-' + timestamp.toHexString())
 
+    let benchmarkValue = contract.try_getBenchMarkValue()
+    if (benchmarkValue.reverted) {
+      log.error('Failed to get benchmark value', [])
+      entry.benchmarkValue = BigInt.zero()
+    } else {
+      entry.benchmarkValue = benchmarkValue.value
+    }
+
     entry.createdTimestamp = timestamp
     entry.plnStake = plnStake
     entry.vePlnStake = vePlnStake
