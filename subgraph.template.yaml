@@ -1,5 +1,5 @@
 specVersion: 0.0.2
-description: Pollen is next generation community powered asset management platform
+description: Pollen Defi is a community powered asset management platform
 repository: https://github.com/PollenDeFi/pollen-subgraph-v3
 
 schema:
@@ -7,33 +7,8 @@ schema:
 
 dataSources:
   - kind: ethereum/contract
-    name: Module
-    network: {{ network }}
-    source:
-      address: '{{ pollenDAO }}'
-      abi: PollenDAO
-      startBlock: {{ startBlock }}
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      file: ./src/mappings/modules.ts
-      entities:
-        - Module
-      abis:
-        - name: PollenDAO
-          file: ./abis/PollenDAO.json
-      eventHandlers:
-        - event: ModuleAdded(indexed address,string)
-          handler: handleModuleAdded
-        - event: ModuleUpdated(indexed address,address)
-          handler: handleModuleUpdated
-        - event: PollenTokenSet(indexed address)
-          handler: handlePollenTokenSet
-
-  - kind: ethereum/contract
     name: Portfolio
-    network: {{network}}
+    network: {{ network }}
     source:
       address: '{{ pollenDAO }}'
       abi: Portfolio
@@ -44,7 +19,6 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/portfolio.ts
       entities:
-        - User
         - UserStat
         - Asset
         - PortfolioAllocation
@@ -52,8 +26,8 @@ dataSources:
       abis:
         - name: Portfolio
           file: ./abis/Portfolio.json
-        - name: PAI
-          file: ./abis/PAI.json
+        - name: ERC20
+          file: ./abis/ERC20.json
         - name: Quoter
           file: ./abis/Quoter.json
       eventHandlers:
@@ -61,32 +35,36 @@ dataSources:
           handler: handleAssetAdded
         - event: AssetRemoved(indexed address)
           handler: handleAssetRemoved
-        - event: PortfolioCreated(indexed address,uint256,uint256)
+        - event: PortfolioCreated(indexed address,uint256,uint256[],bool)
           handler: handlePortfolioCreated
-        - event: PortfolioClosed(indexed address,uint256,uint256,uint256)
-          handler: handlePortfolioClosed
-        - event: PortfolioRebalanced(indexed address,uint256,uint256,uint256,uint256)
+        - event: PortfolioRebalanced(indexed address,uint256[],uint256,uint256,uint256,bool)
           handler: handlePortfolioRebalanced
+        - event: Delegated(indexed address,indexed address,uint256,bool)
+          handler: handleDelegated
+        - event: BenchmarkPortfolioCreated(indexed address,uint256[])
+          handler: handleBenchmarkCreated
 
   - kind: ethereum/contract
-    name: Delegation
+    name: Minter
     network: {{ network }}
     source:
       address: '{{ pollenDAO }}'
-      abi: Delegation
+      abi: Minter
       startBlock: {{ startBlock }}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/mappings/delegation.ts
+      file: ./src/mappings/minter.ts
       entities:
-        - User
         - UserStat
-        - Delegation
+        - Portfolio
       abis:
-        - name: Delegation
-          file: ./abis/Delegation.json
+        - name: Minter
+          file: ./abis/Minter.json
       eventHandlers:
-        - event: Delegated(indexed address,indexed address,uint256)
-          handler: handleDelegated
+        - event: WithdrawWithPenalty(indexed address,indexed address,uint256,uint256,uint256,bool)
+          handler: handleWithdrawWithPenalty
+        - event: WithdrawWithReward(indexed address,indexed address,uint256,uint256,uint256,bool)
+          handler: handleWithdrawWithReward
+          

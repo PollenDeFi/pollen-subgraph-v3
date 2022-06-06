@@ -7,8 +7,10 @@
     "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
     "prepare:ropsten": "mustache config/ropsten.json subgraph.template.yaml > subgraph.yaml",
     "prepare:rinkeby": "mustache config/rinkeby.json subgraph.template.yaml > subgraph.yaml",
+    "prepare:avalanche": "mustache config/avalanche.json subgraph.template.yaml > subgraph.yaml",
     "prepare:fuji": "mustache config/fuji.json subgraph.template.yaml > subgraph.yaml",
     "deploy:rinkeby": "graph deploy --node https://api.thegraph.com/deploy/ PollenDeFi/pollen-v3-rinkeby",
+    "deploy:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ PollenDeFi/pollen-v3",
     "deploy:fuji": "graph deploy --node https://api.thegraph.com/deploy/ PollenDeFi/pollen-v3-fuji",
     "deploy:staging:fuji": "graph deploy --node https://api.thegraph.com/deploy/ PollenDeFi/pollen-v3-fuji-staging",
     "create-local": "graph create --node http://localhost:8020/ PollenDeFi/pollen-subgraph-v3",
@@ -16,8 +18,8 @@
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 PollenDeFi/pollen-subgraph-v3"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.22.3",
-    "@graphprotocol/graph-ts": "0.23.1",
+    "@graphprotocol/graph-cli": "^0.26.1",
+    "@graphprotocol/graph-ts": "^0.27.0",
     "mustache": "^4.2.0"
   }
 }
