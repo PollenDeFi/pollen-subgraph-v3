@@ -440,8 +440,10 @@ function createPortfolio(
 
       if (isVePln) {
         portfolio.vePlnStake = stake
+        portfolio.plnStake = BigInt.zero()
       } else {
         portfolio.plnStake = stake
+        portfolio.vePlnStake = BigInt.zero()
       }
     }
 

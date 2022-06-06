@@ -15,6 +15,7 @@ export function getOrCreateUserStat(address: string): UserStat {
     stat.rewardsOrPenaltiesPln = BigDecimal.zero()
     stat.rewardsOrPenaltiesVePln = BigDecimal.zero()
     stat.totalRewardsForDelegators = BigDecimal.zero()
+    stat.totalDelegationFeesPaid = BigInt.zero()
     stat.totalDelegationFeesEarned = BigInt.zero()
     stat.totalRebalances = BigInt.fromI32(0)
     stat.portfolioOpen = false
