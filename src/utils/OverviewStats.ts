@@ -7,6 +7,7 @@ export function getOrCreateOverviewStats(): OverviewStat {
 
   if (overviewStats == null) {
     overviewStats = new OverviewStat(USER_OVERVIEW_STATS_ID)
+    overviewStats.totalFeesPaid = BigInt.zero()
     overviewStats.totalPlnStaked = BigDecimal.zero()
     overviewStats.totalVePlnStaked = BigDecimal.zero()
     overviewStats.totalPlnEarnedBurned = BigDecimal.zero()
