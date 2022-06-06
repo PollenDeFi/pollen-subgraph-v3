@@ -1,8 +1,18 @@
-type User @entity {
-  id: ID!
-  portfolioHistory: [VirtualPortfolio!]! @derivedFrom(field: "owner")
-  currentPortfolio: VirtualPortfolio
-  stats: UserStat!
+enum PollenTokenType {
+  pln
+  vepln
+}
+
+enum ChartType {
+  PortfolioManagers
+  TotalPlnStaked
+  TotalVePlnStaked
+  TotalProfitLossPln
+  TotalProfitLossVePln
+  Delegators
+  TotalVePlnDelegated
+  TotalPlnDelegated
+  TotalDelegationFeesPaid
 }
 
 type Asset @entity {
@@ -10,7 +20,7 @@ type Asset @entity {
   name: String!
   symbol: String!
   decimals: Int!
-  totalAllocation: Int!
+  totalAllocation: BigInt!
   isRemoved: Boolean!
   addedTimestamp: BigInt!
 }
@@ -19,58 +29,168 @@ type PortfolioAllocation @entity {
   id: ID!
   asset: Asset!
   amount: BigInt!
-  weight: Int!
+  weight: BigInt!
   initialUsdPrice: BigInt!
+}
+
+type AssetProfitOrLoss @entity {
+  id: ID!
+  asset: Asset!
+  profitOrLoss: BigDecimal!
 }
 
 type PortfolioEntry @entity {
   id: ID!
+  plnStake: BigInt!
+  vePlnStake: BigInt!
   initialValue: BigInt!
   closingValue: BigInt
-  pollenStake: BigInt!
-  stakeGainOrLoss: BigInt!
   allocations: [PortfolioAllocation!]!
   createdTimestamp: BigInt!
   closedTimestamp: BigInt
+  benchmarkValue: BigInt!
 }
 
 type VirtualPortfolio @entity {
   id: ID!
-  owner: User!
+  openTimestamp: BigInt!
+  updatedTimestamp: BigInt!
+  owner: String!
   currentEntry: PortfolioEntry
-  createdTimestamp: BigInt!
-  closedTimestamp: BigInt
+  isClosed: Boolean!
   rebalances: [PortfolioEntry!]!
-}
-
-type Delegation @entity {
-  id: ID!
-  delegator: User!
-  delegatee: User!
-  amount: BigInt!
+  plnStake: BigInt!
+  vePlnStake: BigInt!
+  rewardsOrPenaltiesPln: BigDecimal!
+  rewardsOrPenaltiesVePln: BigDecimal!
+  assetsProfitOrLoss: [AssetProfitOrLoss!]!
+  ownerStats: UserStat!
+  isBenchmark: Boolean!
 }
 
 type UserStat @entity {
   id: ID!
-  user: User!
   address: String!
-  totalDelegatedTo: BigInt!
-  totalDelegatedFrom: BigInt!
+  totalPlnDelegatedTo: BigInt!
+  totalPlnDelegatedFrom: BigInt!
+  totalVePlnDelegatedTo: BigInt!
+  totalVePlnDelegatedFrom: BigInt!
+  totalDelegators: BigInt!
   reputation: BigDecimal!
-  pollenPnl: BigDecimal!
+  rewardsOrPenaltiesPln: BigDecimal!
+  rewardsOrPenaltiesVePln: BigDecimal!
   totalRebalances: BigInt!
-}
-
-type Module @entity {
-  id: ID!
-  address: String!
-  lastUpdated: BigInt!
+  totalDelegationFeesEarned: BigInt!
+  totalDelegationFeesPaid: BigInt!
+  totalRewardsForDelegators: BigDecimal!
+  portfolio: VirtualPortfolio
+  portfolioOpen: Boolean!
+  updatedTimestamp: BigInt
 }
 
 type OverviewStat @entity {
   id: ID!
-  assetManagers: [User!]!
+  assetManagers: [String!]!
   assetManagersCount: BigInt!
-  totalStaked: BigDecimal!
-  totalPlnEarned: BigDecimal!
+  delegators: [String!]!
+  delegatorsCount: BigInt!
+  totalDelegated: BigDecimal!
+  totalVePlnStaked: BigDecimal!
+  totalPlnStaked: BigDecimal!
+  totalPlnEarnedBurned: BigDecimal!
+  totalVePlnEarnedBurned: BigDecimal!
+  totalFeesPaid: BigInt!
+}
+
+type Delegation @entity {
+  id: ID!
+  delegator: String!
+  delegatee: String!
+  rewardsOrPenaltiesPln: BigDecimal!
+  rewardsOrPenaltiesVePln: BigDecimal!
+  plnAmount: BigInt!
+  vePlnAmount: BigInt!
+  startTimestamp: BigInt!
+  updatedTimestamp: BigInt!
+  stopTimestamp: BigInt!
+  delegatorStats: UserStat!
+  delegateeStats: UserStat!
+}
+
+type DelegateDeposit @entity {
+  id: ID!
+  delegator: String!
+  delegatee: String!
+  amount: BigInt!
+  timestamp: BigInt!
+  tokenType: PollenTokenType!
+}
+
+type DelegateWithdrawal @entity {
+  id: ID!
+  delegator: String!
+  delegatee: String!
+  withdrawAmount: BigInt!
+  delegatorRewardPenaltyPln: BigDecimal!
+  delegatorRewardPenaltyVePln: BigDecimal!
+  delegateFee: BigInt!
+  timestamp: BigInt!
+  tokenType: PollenTokenType!
+}
+
+type PortfolioDeposit @entity {
+  id: ID!
+  user: String!
+  amount: BigInt!
+  timestamp: BigInt!
+  tokenType: PollenTokenType!
+}
+
+type PortfolioStakeWithdrawal @entity {
+  id: ID!
+  user: String!
+  withdrawAmount: BigInt!
+  deposited: BigInt!
+  rewardPenaltyPln: BigDecimal!
+  rewardPenaltyVePln: BigDecimal!
+  timestamp: BigInt!
+  tokenType: PollenTokenType!
+}
+
+type DailyChartItem @entity {
+  id: ID!
+  type: ChartType!
+  value: BigDecimal!
+  timestamp: BigInt!
+}
+
+enum PortfolioEventType {
+  portfolio_deposit
+  portfolio_withdrawal
+  portfolio_rebalance
+}
+
+enum DelegationEventType {
+  delegate_deposit
+  delegate_withdrawal
+}
+
+type PortfolioEvent @entity {
+  id: ID!
+  type: PortfolioEventType!
+  user: String!
+  timestamp: BigInt!
+  portfolioDeposit: PortfolioDeposit
+  portfolioWithdrawal: PortfolioStakeWithdrawal
+  portfolioRebalance: PortfolioEntry
+}
+
+type DelegationEvent @entity {
+  id: ID!
+  type: DelegationEventType!
+  timestamp: BigInt!
+  delegator: String!
+  delegatee: String!
+  delegateDeposit: DelegateDeposit
+  delegateWithdrawal: DelegateWithdrawal
 }

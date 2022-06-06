@@ -46,11 +46,6 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
         "internalType": "enum QuoterModuleStorage.RateBase",
         "name": "rateBase",
         "type": "uint8"
@@ -73,11 +68,6 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
       {
         "internalType": "enum QuoterModuleStorage.RateBase[]",
         "name": "rateBase",
@@ -102,11 +92,6 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
         "internalType": "enum QuoterModuleStorage.RateBase",
         "name": "rateBase",
         "type": "uint8"
@@ -121,7 +106,7 @@
     "outputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "priceFeed",
         "type": "address"
       }
     ],
@@ -130,11 +115,6 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
       {
         "internalType": "enum QuoterModuleStorage.RateBase",
         "name": "rateBase",
@@ -164,11 +144,6 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
       {
         "internalType": "enum QuoterModuleStorage.RateBase",
         "name": "rateBase",

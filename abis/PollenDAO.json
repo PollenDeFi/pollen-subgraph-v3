@@ -1,5 +1,10 @@
 [
   {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -29,9 +34,9 @@
       },
       {
         "indexed": false,
-        "internalType": "string",
-        "name": "moduleName",
-        "type": "string"
+        "internalType": "bytes4[]",
+        "name": "selectors",
+        "type": "bytes4[]"
       }
     ],
     "name": "ModuleAdded",
@@ -43,14 +48,45 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "newModuleAddr",
+        "name": "moduleAddr",
         "type": "address"
       },
       {
         "indexed": false,
+        "internalType": "bytes4[]",
+        "name": "selectors",
+        "type": "bytes4[]"
+      }
+    ],
+    "name": "ModuleRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "address",
-        "name": "oldModuleAddr",
+        "name": "newImplementation",
         "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldImplementation",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes4[]",
+        "name": "newSelectors",
+        "type": "bytes4[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes4[]",
+        "name": "oldSelectors",
+        "type": "bytes4[]"
       }
     ],
     "name": "ModuleUpdated",
@@ -60,9 +96,15 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "address",
         "name": "pollenTokenAddr",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "vePollenTokenAddr",
         "type": "address"
       }
     ],
@@ -74,38 +116,30 @@
     "type": "fallback"
   },
   {
-    "inputs": [],
-    "name": "daoAdmin",
-    "outputs": [
+    "inputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "implementation",
         "type": "address"
+      },
+      {
+        "internalType": "bytes4[]",
+        "name": "selectors",
+        "type": "bytes4[]"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "initialize",
+    "name": "addModule",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "inputs": [],
     "name": "pollenToken",
     "outputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "plnTokenAddress",
         "type": "address"
       }
     ],
@@ -113,19 +147,8 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_moduleAddr",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "_moduleName",
-        "type": "string"
-      }
-    ],
-    "name": "registerModule",
+    "inputs": [],
+    "name": "renounceAdminRole",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -134,11 +157,16 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "pollen",
+        "name": "pollenToken_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "vePollenToken_",
         "type": "address"
       }
     ],
-    "name": "setPollenToken",
+    "name": "setPollenTokens",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -160,18 +188,23 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "newAddr",
+        "name": "newImplementation",
         "type": "address"
       },
       {
         "internalType": "address",
-        "name": "oldAddr",
+        "name": "oldImplementation",
         "type": "address"
       },
       {
-        "internalType": "string",
-        "name": "_moduleName",
-        "type": "string"
+        "internalType": "bytes4[]",
+        "name": "newSelectors",
+        "type": "bytes4[]"
+      },
+      {
+        "internalType": "bytes4[]",
+        "name": "oldSelectors",
+        "type": "bytes4[]"
       }
     ],
     "name": "updateModule",
