@@ -100,6 +100,7 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
       for (let i = 0; i < currentEntry.allocations.length; i++) {
         let allocation = PortfolioAllocation.load(currentEntry.allocations[i])!
         let asset = Asset.load(allocation.asset)!
+
         updateAssetProfitLoss(existingPortfolio, allocation, event.address)
 
         asset.totalAllocation = asset.totalAllocation.minus(allocation.weight)
@@ -187,8 +188,12 @@ export function handleDelegated(event: Delegated): void {
     // Delegating to yourself just means increasing your current stake
     let portfolio = VirtualPortfolio.load(delegatee)
     if (portfolio) {
-      let newStake = portfolio.plnStake.plus(event.params.amount)
-      portfolio.plnStake = newStake
+      if (event.params.tokenType) {
+        portfolio.vePlnStake = portfolio.vePlnStake.plus(event.params.amount)
+      } else {
+        portfolio.plnStake = portfolio.plnStake.plus(event.params.amount)
+      }
+
       portfolio.updatedTimestamp = event.block.timestamp
       let delegateeStat = getOrCreateUserStat(delegatee)
       delegateeStat.portfolioOpen = true
