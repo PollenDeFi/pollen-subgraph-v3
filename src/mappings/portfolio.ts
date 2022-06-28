@@ -68,6 +68,14 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
   log.info('Rebalancing Portfolio, {}', [userAddr])
   let existingPortfolio = VirtualPortfolio.load(userAddr)
 
+  updatePollenatorOverviewStats(
+    event.params.amount.toBigDecimal(),
+    event.params.creator.toHexString(),
+    BigDecimal.fromString('0'),
+    event.params.tokenType,
+    event.block.timestamp
+  )
+
   if (event.params.amount.gt(BigInt.zero())) {
     let deposit = new PortfolioDeposit(userAddr + event.block.number.toString())
     deposit.amount = event.params.amount
@@ -217,6 +225,14 @@ export function handleDelegated(event: Delegated): void {
     depositEvent.type = 'portfolio_deposit'
     depositEvent.portfolioDeposit = deposit.id
     depositEvent.save()
+
+    updatePollenatorOverviewStats(
+      event.params.amount.toBigDecimal(),
+      event.params.delegator.toHexString(),
+      BigDecimal.fromString('0'),
+      event.params.tokenType,
+      event.block.timestamp
+    )
   } else {
     // Delegating to someone else
     let id = delegator + '-' + delegatee

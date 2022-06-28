@@ -150,7 +150,6 @@ type PortfolioStakeWithdrawal @entity {
   id: ID!
   user: String!
   withdrawAmount: BigInt!
-  deposited: BigInt!
   rewardPenaltyPln: BigDecimal!
   rewardPenaltyVePln: BigDecimal!
   timestamp: BigInt!
