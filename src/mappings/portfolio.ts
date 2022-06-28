@@ -190,7 +190,7 @@ export function handleDelegated(event: Delegated): void {
   let delegator = event.params.delegator.toHexString()
   let delegatee = event.params.delegatee.toHexString()
 
-  log.info('handle delegated, {} {}', [delegator, delegatee])
+  log.info('Handle delegated, {} {}', [delegator, delegatee])
 
   if (delegator == delegatee) {
     // Delegating to yourself just means increasing your current stake
@@ -278,6 +278,9 @@ export function handleDelegated(event: Delegated): void {
       delegation.rewardsOrPenaltiesVePln = BigDecimal.zero()
       delegation.delegatee = delegatee
       delegation.delegator = delegator
+      delegation.vePlnAmount = BigInt.zero()
+      delegation.plnAmount = BigInt.zero()
+      delegation.stopTimestamp = BigInt.zero()
       if (event.params.tokenType) {
         delegation.vePlnAmount = event.params.amount
       } else {
@@ -329,23 +332,25 @@ function mapAllocations(
   let allocations: string[] = []
 
   for (let i = 0; i < assets.length; i++) {
-    if (assets[i] !== null) {
+    if (assets[i]) {
       let asset = Asset.load(assets[i].toHexString())
-      let allocation = new PortfolioAllocation(assets[i].toHexString() + '-' + entryId)
+      if (asset) {
+        let allocation = new PortfolioAllocation(asset.id + '-' + entryId)
 
-      let price = quoterContract.quotePrice(0, Address.fromString(asset!.id))
+        let price = quoterContract.quotePrice(0, Address.fromString(asset.id))
 
-      allocation.initialUsdPrice = price.value0
-      allocation.asset = asset!.id
-      allocation.weight = weights[i]
-      allocation.amount = amounts[i]
-      allocation.save()
+        allocation.initialUsdPrice = price.value0
+        allocation.asset = asset.id
+        allocation.weight = weights[i]
+        allocation.amount = amounts[i]
+        allocation.save()
 
-      allocations.push(allocation.id)
+        allocations.push(allocation.id)
 
-      if (asset && weights[i]) {
-        asset.totalAllocation = asset.totalAllocation.plus(weights[i])
-        asset.save()
+        if (weights[i]) {
+          asset.totalAllocation = asset.totalAllocation.plus(weights[i])
+          asset.save()
+        }
       }
     }
   }
@@ -530,10 +535,14 @@ function updateAssetProfitLoss(
 
   if (!assetProfitOrLoss) {
     assetProfitOrLoss = new AssetProfitOrLoss(profitLossId)
+    assetProfitOrLoss.profitOrLoss = BigDecimal.zero()
     assetProfitOrLoss.asset = allocation.asset
+
     let profitAndLosses = portfolio.assetsProfitOrLoss
     profitAndLosses.push(assetProfitOrLoss.id)
     portfolio.assetsProfitOrLoss = profitAndLosses
+
+    portfolio.save()
   }
 
   let startValue = allocation.initialUsdPrice.times(allocation.amount).toBigDecimal()
