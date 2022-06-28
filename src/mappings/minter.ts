@@ -1,4 +1,4 @@
-import { Address, BigInt, log } from '@graphprotocol/graph-ts'
+import { Address, BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
 import { WithdrawWithPenalty, WithdrawWithReward } from '../../generated/Minter/Minter'
 
 import {
@@ -70,8 +70,10 @@ function handleWithdraw(
     let withdrawal = new PortfolioStakeWithdrawal(id)
     if (isVePln) {
       withdrawal.rewardPenaltyVePln = rewardPenaltyDecimal
+      withdrawal.rewardPenaltyPln = BigDecimal.zero()
     } else {
       withdrawal.rewardPenaltyPln = rewardPenaltyDecimal
+      withdrawal.rewardPenaltyVePln = BigDecimal.zero()
     }
     withdrawal.withdrawAmount = withdrawAmount
     withdrawal.user = user
@@ -136,6 +138,8 @@ function handleWithdraw(
     withdrawal.withdrawAmount = withdrawAmount
     withdrawal.delegatee = owner
     withdrawal.delegator = user
+    withdrawal.delegatorRewardPenaltyPln = BigDecimal.zero()
+    withdrawal.delegatorRewardPenaltyVePln = BigDecimal.zero()
     withdrawal.tokenType = isVePln ? 'vepln' : 'pln'
 
     let withdrawEvent = new DelegationEvent('withdrawal-' + user + timestamp.toString())
