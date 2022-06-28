@@ -190,7 +190,7 @@ export function handleDelegated(event: Delegated): void {
   let delegator = event.params.delegator.toHexString()
   let delegatee = event.params.delegatee.toHexString()
 
-  log.info('handle delegated, {} {}', [delegator, delegatee])
+  log.info('Handle delegated, {} {}', [delegator, delegatee])
 
   if (delegator == delegatee) {
     // Delegating to yourself just means increasing your current stake
@@ -331,7 +331,6 @@ function mapAllocations(
 ): string[] {
   let allocations: string[] = []
 
-  log.info('START LOOP {}', [assets.length.toString()])
   for (let i = 0; i < assets.length; i++) {
     if (assets[i]) {
       let asset = Asset.load(assets[i].toHexString())
