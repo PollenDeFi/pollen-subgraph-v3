@@ -26,7 +26,10 @@ import {
 } from '../../generated/schema'
 
 import { getOrCreateUserStat } from '../utils/UserStat'
-import { updatePollenatorOverviewStats } from '../utils/OverviewStats'
+import {
+  updateDelegatorOverviewStats,
+  updatePollenatorOverviewStats,
+} from '../utils/OverviewStats'
 
 export function handlePortfolioCreated(event: PortfolioCreated): void {
   let userAddr = event.params.creator.toHexString()
@@ -311,6 +314,15 @@ export function handleDelegated(event: Delegated): void {
         event.params.amount
       )
     }
+
+    updateDelegatorOverviewStats(
+      event.params.amount.toBigDecimal(),
+      delegator,
+      BigDecimal.zero(),
+      BigInt.zero(),
+      event.block.timestamp,
+      event.params.tokenType
+    )
 
     delegateeStat.updatedTimestamp = event.block.timestamp
     delegatorStat.updatedTimestamp = event.block.timestamp
