@@ -8,6 +8,7 @@
     "prepare:ropsten": "mustache config/ropsten.json subgraph.template.yaml > subgraph.yaml",
     "prepare:rinkeby": "mustache config/rinkeby.json subgraph.template.yaml > subgraph.yaml",
     "prepare:avalanche": "mustache config/avalanche.json subgraph.template.yaml > subgraph.yaml",
+    "prepare:local": "mustache config/localhost.json subgraph.template.yaml > subgraph.yaml",
     "prepare:fuji": "mustache config/fuji.json subgraph.template.yaml > subgraph.yaml",
     "deploy:rinkeby": "graph deploy --node https://api.thegraph.com/deploy/ PollenDeFi/pollen-v3-rinkeby",
     "deploy:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ PollenDeFi/pollen-v3",
