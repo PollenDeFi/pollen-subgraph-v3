@@ -26,9 +26,6 @@ export function handleNewLeague(event: NewLeague): void {
   league.timestamp = timestamp
   league.claimed = false
   league.name = name
-  league.members = [member.id]
-
-  member.leagues = [league.id]
 
   leagueMember.member = member.id
   leagueMember.league = league.id
