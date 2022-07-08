@@ -194,12 +194,12 @@ type DelegationEvent @entity {
   delegateWithdrawal: DelegateWithdrawal
 }
 
+"---Leagues related entities---"
 type League @entity {
   id: ID!
   name: String!
   admin: String!
   timestamp: BigInt!
-  claimed: Boolean!
   members: [LeagueMember!]! @derivedFrom(field: "league")
 }
 
@@ -211,5 +211,11 @@ type Member @entity {
 type LeagueMember @entity {
   id: ID!
   member: Member!
+  league: League!
+}
+
+type Invitation @entity {
+  id: ID!
+  user: String!
   league: League!
 }

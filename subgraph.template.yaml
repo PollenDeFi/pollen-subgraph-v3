@@ -91,7 +91,7 @@ dataSources:
         - event: Invited(indexed address,indexed uint256)
           handler: handleInvited
         - event: JoinedLeague(indexed address,indexed uint256)
-          handler: handleInvited
+          handler: handleJoinedLeague
         - event: LeftLeague(indexed address,uint256)
           handler: handleLeftLeague
         - event: TrasnferAdminRole(indexed address,indexed address,uint256)
