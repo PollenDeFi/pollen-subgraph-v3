@@ -193,3 +193,24 @@ type DelegationEvent @entity {
   delegateDeposit: DelegateDeposit
   delegateWithdrawal: DelegateWithdrawal
 }
+
+type League @entity {
+  id: ID!
+  name: String!
+  admin: String!
+  timestamp: BigInt!
+  claimed: Boolean!
+  uri: String!
+  members: [LeagueMember!]! @derivedFrom(field: "league")
+}
+
+type Member @entity {
+  id: ID!
+  leagues: [LeagueMember!] @derivedFrom(field: "member")
+}
+
+type LeagueMember @entity {
+  id: ID!
+  member: Member!
+  league: League!
+}

@@ -67,4 +67,34 @@ dataSources:
           handler: handleWithdrawWithPenalty
         - event: WithdrawWithReward(indexed address,indexed address,uint256,uint256,uint256,bool)
           handler: handleWithdrawWithReward
-          
+
+  - kind: ethereum/contract
+    name: Leagues
+    network: {{ network }}
+    source:
+      address: '{{ leagues }}'
+      abi: Leagues
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/mappings/leagues.ts
+      entities:
+        - Leagues
+      abis:
+        - name: Leagues
+          file: ./abis/Leagues.json
+      eventHandlers:
+        - event: NewLeague(indexed address,uint256,string)
+          handler: handleNewLeague
+        - event: Invited(indexed address,indexed uint256)
+          handler: handleInvited
+        - event: JoinedLeague(indexed address,indexed uint256)
+          handler: handleInvited
+        - event: LeftLeague(indexed address,uint256)
+          handler: handleLeftLeague
+        - event: TrasnferAdminRole(indexed address,indexed address,uint256)
+          handler: handleTransferAdminRole
+        - event: MemberRemoved(indexed address,indexed uint256)
+          handler: handleMemberRemoved
