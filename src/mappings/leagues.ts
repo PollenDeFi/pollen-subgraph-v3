@@ -43,8 +43,11 @@ export function handleJoinedLeague(event: JoinedLeague): void {
   let member = Member.load(user)
   let league = League.load(leagueId)
 
-  if (member === null && league) {
-    member = new Member(user)
+  if (league) {
+    if (member === null) {
+      member = new Member(user)
+      member.save()
+    }
 
     let leagueMember = new LeagueMember(user.concat(leagueId))
 
@@ -55,7 +58,7 @@ export function handleJoinedLeague(event: JoinedLeague): void {
 
     store.remove('Invitation', user.concat(leagueId))
 
-    log.info('Joined league {} {} {}', [league.id, league.name, user])
+    log.info('Joined league {} - {}, user: {}', [league.id, league.name, user])
   } else {
     log.error('Failed to join league', [])
   }
