@@ -201,6 +201,7 @@ type League @entity {
   admin: String!
   timestamp: BigInt!
   members: [LeagueMember!]! @derivedFrom(field: "league")
+  membersCount: BigInt!
 }
 
 type Member @entity {

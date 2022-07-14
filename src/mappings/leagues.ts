@@ -25,6 +25,7 @@ export function handleNewLeague(event: NewLeague): void {
   league.admin = admin
   league.timestamp = timestamp
   league.name = name
+  league.membersCount = BigInt.fromI32(1)
 
   leagueMember.member = member.id
   leagueMember.league = league.id
@@ -53,8 +54,10 @@ export function handleJoinedLeague(event: JoinedLeague): void {
 
     leagueMember.member = member.id
     leagueMember.league = league.id
+    league.membersCount = league.membersCount.plus(BigInt.fromI32(1))
 
     leagueMember.save()
+    league.save()
 
     store.remove('Invitation', user.concat(leagueId))
 
@@ -127,7 +130,11 @@ function removeMember(user: Address, id: BigInt): void {
   let league = League.load(leagueId)
 
   if (member && league) {
+    league.membersCount = league.membersCount.minus(BigInt.fromI32(1))
+
+    league.save()
     store.remove('LeagueMember', assoc)
+
     log.info('Removed member {}', [member.id])
   } else {
     log.error('Failed to remove member', [])
