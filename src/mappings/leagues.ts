@@ -10,7 +10,7 @@ import {
   TrasnferAdminRole,
 } from '../../generated/Leagues/Leagues'
 
-import { League, Member, LeagueMember, Invitation } from '../../generated/schema'
+import { League, Member, Invitation } from '../../generated/schema'
 
 export function handleNewLeague(event: NewLeague): void {
   let id = event.params.id.toHexString()
@@ -20,19 +20,15 @@ export function handleNewLeague(event: NewLeague): void {
 
   let league = new League(id)
   let member = new Member(admin)
-  let leagueMember = new LeagueMember(admin.concat(id))
 
   league.admin = admin
   league.timestamp = timestamp
   league.name = name
+  league.members = [member.id]
   league.membersCount = BigInt.fromI32(1)
-
-  leagueMember.member = member.id
-  leagueMember.league = league.id
 
   league.save()
   member.save()
-  leagueMember.save()
 
   log.info('New league {} {}', [id, name])
 }
@@ -50,13 +46,10 @@ export function handleJoinedLeague(event: JoinedLeague): void {
       member.save()
     }
 
-    let leagueMember = new LeagueMember(user.concat(leagueId))
+    let leagueMembers = league.members
+    leagueMembers.push(member.id)
 
-    leagueMember.member = member.id
-    leagueMember.league = league.id
-    league.membersCount = league.membersCount.plus(BigInt.fromI32(1))
-
-    leagueMember.save()
+    league.members = leagueMembers
     league.save()
 
     store.remove('Invitation', user.concat(leagueId))
@@ -84,25 +77,21 @@ export function handleTransferAdminRole(event: TrasnferAdminRole): void {
 
   if (league) {
     let member = Member.load(newAdmin)
-
-    if (member) {
-      let leagueMember = new LeagueMember(newAdmin.concat(leagueId))
-      leagueMember.member = member.id
-      leagueMember.league = league.id
-      leagueMember.save()
-    } else {
-      let leagueMember = new LeagueMember(newAdmin.concat(leagueId))
+    if (member === null) {
       member = new Member(newAdmin)
       member.save()
-
-      leagueMember.member = member.id
-      leagueMember.league = league.id
-      leagueMember.save()
     }
-    league.admin = newAdmin
-    league.save()
 
-    store.remove('LeagueMember', oldAdmin.concat(leagueId))
+    let leagueMembers = league.members
+    const oldMember = leagueMembers.indexOf(oldAdmin)
+
+    if (oldMember !== -1) leagueMembers.splice(oldMember, 1)
+
+    leagueMembers.push(newAdmin)
+
+    league.admin = newAdmin
+    league.members = leagueMembers
+    league.save()
   } else {
     log.error('Failed to transfer admin role', [])
   }
@@ -124,19 +113,25 @@ export function handleInvited(event: Invited): void {
 function removeMember(user: Address, id: BigInt): void {
   let userId = user.toHexString()
   let leagueId = id.toHexString()
-
-  let assoc = userId.concat(leagueId)
-  let member = Member.load(userId)
   let league = League.load(leagueId)
 
-  if (member && league) {
-    league.membersCount = league.membersCount.minus(BigInt.fromI32(1))
+  if (league) {
+    let leagueMembers = league.members
+    const removedMember = leagueMembers.indexOf(userId)
+    let member = Member.load(userId)
 
-    league.save()
-    store.remove('LeagueMember', assoc)
+    if (removedMember !== -1) {
+      leagueMembers.splice(removedMember, 1)
 
-    log.info('Removed member {}', [member.id])
+      league.membersCount = league.membersCount.minus(BigInt.fromI32(1))
+      league.members = leagueMembers
+      league.save()
+
+      if (member && member.leagues) {
+        if (member.leagues!.length === 0) store.remove('Member', member.id)
+      }
+    }
   } else {
-    log.error('Failed to remove member', [])
+    log.error('Failed to remove member from league {}', [leagueId])
   }
 }
