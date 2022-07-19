@@ -27,8 +27,8 @@ export function handleNewLeague(event: NewLeague): void {
   league.members = [member.id]
   league.membersCount = BigInt.fromI32(1)
 
-  league.save()
   member.save()
+  league.save()
 
   log.info('New league {} {}', [id, name])
 }
@@ -50,6 +50,7 @@ export function handleJoinedLeague(event: JoinedLeague): void {
     leagueMembers.push(member.id)
 
     league.members = leagueMembers
+    league.membersCount.plus(BigInt.fromI32(1))
     league.save()
 
     store.remove('Invitation', user.concat(leagueId))
