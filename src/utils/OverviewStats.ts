@@ -1,5 +1,5 @@
 import { DailyChartItem, Member, OverviewStat, League } from '../../generated/schema'
-import { BigDecimal, BigInt } from '@graphprotocol/graph-ts'
+import { BigDecimal, BigInt, Value } from '@graphprotocol/graph-ts'
 import { USER_OVERVIEW_STATS_ID } from './constants'
 
 export function getOrCreateOverviewStats(): OverviewStat {
@@ -31,7 +31,6 @@ export function updatePollenatorOverviewStats(
   timestamp: BigInt
 ): void {
   let overviewStats = getOrCreateOverviewStats()
-  let member = Member.load(assetManagerAddress)
 
   if (isVePln) {
     overviewStats.totalVePlnStaked = overviewStats.totalVePlnStaked.plus(stake)
@@ -39,16 +38,7 @@ export function updatePollenatorOverviewStats(
   } else {
     overviewStats.totalPlnStaked = overviewStats.totalPlnStaked.plus(stake)
     updateDailyChartItem(timestamp, 'TotalPlnStaked', overviewStats.totalPlnStaked)
-
-    if (member) {
-      for (let i = 0; i < member.leagues.length; i++) {
-        let league = League.load(member.leagues[i])
-        if (league) {
-          league.totalPlnStaked = league.totalPlnStaked.plus(stake)
-          league.save()
-        }
-      }
-    }
+    updateLeagueTotal(assetManagerAddress, 'totalPlnStaked', stake)
   }
 
   let managers = overviewStats.assetManagers
@@ -84,6 +74,7 @@ export function updatePollenatorOverviewStats(
       'TotalProfitLossPln',
       overviewStats.totalPlnEarnedBurned
     )
+    updateLeagueTotal(assetManagerAddress, 'totalPlnBurned', rewardPenalty)
   }
 
   overviewStats.save()
@@ -103,6 +94,7 @@ export function updateDelegatorOverviewStats(
     overviewStats.totalVePlnStaked = overviewStats.totalVePlnStaked.plus(stake)
   } else {
     overviewStats.totalPlnStaked = overviewStats.totalPlnStaked.plus(stake)
+    updateLeagueTotal(delegatorAddress, 'totalPlnStaked', stake)
   }
 
   overviewStats.totalDelegated = overviewStats.totalDelegated.plus(stake)
@@ -139,6 +131,7 @@ export function updateDelegatorOverviewStats(
       'TotalProfitLossPln',
       overviewStats.totalPlnEarnedBurned
     )
+    updateLeagueTotal(delegatorAddress, 'totalPlnBurned', rewardPenalty)
   }
 
   updateDailyChartItem(
@@ -165,4 +158,21 @@ export function updateDailyChartItem(
 
   chartItem.value = value
   chartItem.save()
+}
+
+function updateLeagueTotal(userId: string, stat: string, stake: BigDecimal): void {
+  let member = Member.load(userId)
+  if (member) {
+    for (let i = 0; i < member.leagues.length; i++) {
+      let league = League.load(member.leagues[i])
+      if (league) {
+        let newStake = league
+          .get(stat)!
+          .toBigDecimal()
+          .plus(stake)
+        league.set(stat, Value.fromBigDecimal(newStake))
+        league.save()
+      }
+    }
+  }
 }
