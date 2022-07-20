@@ -1,4 +1,4 @@
-import { DailyChartItem, OverviewStat } from '../../generated/schema'
+import { DailyChartItem, Member, OverviewStat, League } from '../../generated/schema'
 import { BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { USER_OVERVIEW_STATS_ID } from './constants'
 
@@ -31,6 +31,7 @@ export function updatePollenatorOverviewStats(
   timestamp: BigInt
 ): void {
   let overviewStats = getOrCreateOverviewStats()
+  let member = Member.load(assetManagerAddress)
 
   if (isVePln) {
     overviewStats.totalVePlnStaked = overviewStats.totalVePlnStaked.plus(stake)
@@ -38,6 +39,16 @@ export function updatePollenatorOverviewStats(
   } else {
     overviewStats.totalPlnStaked = overviewStats.totalPlnStaked.plus(stake)
     updateDailyChartItem(timestamp, 'TotalPlnStaked', overviewStats.totalPlnStaked)
+
+    if (member) {
+      for (let i = 0; i < member.leagues.length; i++) {
+        let league = League.load(member.leagues[i])
+        if (league) {
+          league.totalPlnStaked = league.totalPlnStaked.plus(stake)
+          league.save()
+        }
+      }
+    }
   }
 
   let managers = overviewStats.assetManagers

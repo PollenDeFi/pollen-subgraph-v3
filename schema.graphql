@@ -200,13 +200,14 @@ type League @entity {
   name: String!
   admin: String!
   timestamp: BigInt!
-  members: [Member!]!
+  members: [Member!]! @derivedFrom(field: "leagues")
   membersCount: BigInt!
+  totalPlnStaked: BigDecimal!
 }
 
 type Member @entity {
   id: ID!
-  leagues: [League!] @derivedFrom(field: "members")
+  leagues: [League!]!
 }
 
 type Invitation @entity {
