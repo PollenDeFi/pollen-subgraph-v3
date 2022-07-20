@@ -204,6 +204,7 @@ type League @entity {
   membersCount: BigInt!
   totalPlnStaked: BigDecimal!
   totalPlnBurned: BigDecimal!
+  rewardsOrPenaltiesPln: BigDecimal!
 }
 
 type Member @entity {

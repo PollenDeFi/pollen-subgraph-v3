@@ -160,7 +160,7 @@ export function updateDailyChartItem(
   chartItem.save()
 }
 
-function updateLeagueTotal(userId: string, stat: string, stake: BigDecimal): void {
+export function updateLeagueTotal(userId: string, stat: string, stake: BigDecimal): void {
   let member = Member.load(userId)
   if (member) {
     for (let i = 0; i < member.leagues.length; i++) {

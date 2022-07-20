@@ -1,5 +1,6 @@
-import { Address, BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
 import { WithdrawWithPenalty, WithdrawWithReward } from '../../generated/Minter/Minter'
+import { updateLeagueTotal } from '../utils/OverviewStats'
 
 import {
   DelegateWithdrawal,
@@ -65,7 +66,7 @@ function handleWithdraw(
   let delegatorStat = getOrCreateUserStat(user)
 
   if (user == owner) {
-    // User withdrawing thier own portfolio stake
+    // User withdrawing their own portfolio stake
     let id = owner + '-portfolio-withdraw-' + timestamp.toString()
     let withdrawal = new PortfolioStakeWithdrawal(id)
     if (isVePln) {
@@ -106,6 +107,7 @@ function handleWithdraw(
         portfolio.rewardsOrPenaltiesPln = portfolio.rewardsOrPenaltiesPln.plus(
           rewardPenaltyDecimal
         )
+        updateLeagueTotal(user, 'rewardsOrPenaltiesPln', rewardPenaltyDecimal)
       }
 
       portfolio.updatedTimestamp = timestamp
@@ -199,6 +201,7 @@ function handleWithdraw(
         delegation.rewardsOrPenaltiesPln = delegation.rewardsOrPenaltiesPln.plus(
           rewardPenaltyDecimal
         )
+        updateLeagueTotal(user, 'rewardsOrPenaltiesPln', rewardPenaltyDecimal)
       }
 
       delegation.updatedTimestamp = timestamp
