@@ -1,5 +1,5 @@
-import { DailyChartItem, OverviewStat } from '../../generated/schema'
-import { BigDecimal, BigInt } from '@graphprotocol/graph-ts'
+import { DailyChartItem, Member, OverviewStat, League } from '../../generated/schema'
+import { BigDecimal, BigInt, Value } from '@graphprotocol/graph-ts'
 import { USER_OVERVIEW_STATS_ID } from './constants'
 
 export function getOrCreateOverviewStats(): OverviewStat {
@@ -35,9 +35,11 @@ export function updatePollenatorOverviewStats(
   if (isVePln) {
     overviewStats.totalVePlnStaked = overviewStats.totalVePlnStaked.plus(stake)
     updateDailyChartItem(timestamp, 'TotalVePlnStaked', overviewStats.totalPlnStaked)
+    updateLeagueTotal(assetManagerAddress, 'totalVePlnStaked', stake)
   } else {
     overviewStats.totalPlnStaked = overviewStats.totalPlnStaked.plus(stake)
     updateDailyChartItem(timestamp, 'TotalPlnStaked', overviewStats.totalPlnStaked)
+    updateLeagueTotal(assetManagerAddress, 'totalPlnStaked', stake)
   }
 
   let managers = overviewStats.assetManagers
@@ -90,8 +92,10 @@ export function updateDelegatorOverviewStats(
 
   if (isVePln) {
     overviewStats.totalVePlnStaked = overviewStats.totalVePlnStaked.plus(stake)
+    updateLeagueTotal(delegatorAddress, 'totalVePlnStaked', stake)
   } else {
     overviewStats.totalPlnStaked = overviewStats.totalPlnStaked.plus(stake)
+    updateLeagueTotal(delegatorAddress, 'totalPlnStaked', stake)
   }
 
   overviewStats.totalDelegated = overviewStats.totalDelegated.plus(stake)
@@ -154,4 +158,25 @@ export function updateDailyChartItem(
 
   chartItem.value = value
   chartItem.save()
+}
+
+export function updateLeagueTotal(
+  userId: string,
+  stat: string,
+  amount: BigDecimal
+): void {
+  let member = Member.load(userId)
+  if (member) {
+    for (let i = 0; i < member.leagues.length; i++) {
+      let league = League.load(member.leagues[i])
+      if (league) {
+        let newStake = league
+          .get(stat)!
+          .toBigDecimal()
+          .plus(amount)
+        league.set(stat, Value.fromBigDecimal(newStake))
+        league.save()
+      }
+    }
+  }
 }
