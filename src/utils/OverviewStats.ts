@@ -35,6 +35,7 @@ export function updatePollenatorOverviewStats(
   if (isVePln) {
     overviewStats.totalVePlnStaked = overviewStats.totalVePlnStaked.plus(stake)
     updateDailyChartItem(timestamp, 'TotalVePlnStaked', overviewStats.totalPlnStaked)
+    updateLeagueTotal(assetManagerAddress, 'totalVePlnStaked', stake)
   } else {
     overviewStats.totalPlnStaked = overviewStats.totalPlnStaked.plus(stake)
     updateDailyChartItem(timestamp, 'TotalPlnStaked', overviewStats.totalPlnStaked)
@@ -74,7 +75,6 @@ export function updatePollenatorOverviewStats(
       'TotalProfitLossPln',
       overviewStats.totalPlnEarnedBurned
     )
-    updateLeagueTotal(assetManagerAddress, 'totalPlnBurned', rewardPenalty)
   }
 
   overviewStats.save()
@@ -92,6 +92,7 @@ export function updateDelegatorOverviewStats(
 
   if (isVePln) {
     overviewStats.totalVePlnStaked = overviewStats.totalVePlnStaked.plus(stake)
+    updateLeagueTotal(delegatorAddress, 'totalVePlnStaked', stake)
   } else {
     overviewStats.totalPlnStaked = overviewStats.totalPlnStaked.plus(stake)
     updateLeagueTotal(delegatorAddress, 'totalPlnStaked', stake)
@@ -131,7 +132,6 @@ export function updateDelegatorOverviewStats(
       'TotalProfitLossPln',
       overviewStats.totalPlnEarnedBurned
     )
-    updateLeagueTotal(delegatorAddress, 'totalPlnBurned', rewardPenalty)
   }
 
   updateDailyChartItem(
@@ -160,7 +160,11 @@ export function updateDailyChartItem(
   chartItem.save()
 }
 
-export function updateLeagueTotal(userId: string, stat: string, stake: BigDecimal): void {
+export function updateLeagueTotal(
+  userId: string,
+  stat: string,
+  amount: BigDecimal
+): void {
   let member = Member.load(userId)
   if (member) {
     for (let i = 0; i < member.leagues.length; i++) {
@@ -169,7 +173,7 @@ export function updateLeagueTotal(userId: string, stat: string, stake: BigDecima
         let newStake = league
           .get(stat)!
           .toBigDecimal()
-          .plus(stake)
+          .plus(amount)
         league.set(stat, Value.fromBigDecimal(newStake))
         league.save()
       }

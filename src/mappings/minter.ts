@@ -100,6 +100,7 @@ function handleWithdraw(
         delegateeStat.rewardsOrPenaltiesVePln = delegateeStat.rewardsOrPenaltiesVePln.plus(
           rewardPenaltyDecimal
         )
+        updateLeagueTotal(user, 'rewardsOrPenaltiesVePln', rewardPenaltyDecimal)
       } else {
         delegateeStat.rewardsOrPenaltiesPln = delegateeStat.rewardsOrPenaltiesPln.plus(
           rewardPenaltyDecimal
@@ -197,6 +198,7 @@ function handleWithdraw(
         delegation.rewardsOrPenaltiesVePln = delegation.rewardsOrPenaltiesVePln.plus(
           rewardPenaltyDecimal
         )
+        updateLeagueTotal(user, 'rewardsOrPenaltiesVePln', rewardPenaltyDecimal)
       } else {
         delegation.rewardsOrPenaltiesPln = delegation.rewardsOrPenaltiesPln.plus(
           rewardPenaltyDecimal

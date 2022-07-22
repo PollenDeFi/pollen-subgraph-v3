@@ -203,8 +203,9 @@ type League @entity {
   members: [Member!]! @derivedFrom(field: "leagues")
   membersCount: BigInt!
   totalPlnStaked: BigDecimal!
-  totalPlnBurned: BigDecimal!
+  totalVePlnStaked: BigDecimal!
   rewardsOrPenaltiesPln: BigDecimal!
+  rewardsOrPenaltiesVePln: BigDecimal!
 }
 
 type Member @entity {

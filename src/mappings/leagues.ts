@@ -26,8 +26,9 @@ export function handleNewLeague(event: NewLeague): void {
   league.name = name
   league.membersCount = BigInt.fromI32(1)
   league.totalPlnStaked = BigDecimal.zero()
-  league.totalPlnBurned = BigDecimal.zero()
+  league.totalVePlnStaked = BigDecimal.zero()
   league.rewardsOrPenaltiesPln = BigDecimal.zero()
+  league.rewardsOrPenaltiesVePln = BigDecimal.zero()
 
   member.leagues = [league.id]
 
