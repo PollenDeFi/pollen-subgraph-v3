@@ -126,9 +126,11 @@ function removeMembership(user: Address, id: BigInt): void {
         const removedLeague = memberLeagues.indexOf(leagueId)
         if (removedLeague !== -1) {
           memberLeagues.splice(removedLeague, 1)
+          member.leagues = memberLeagues
+          member.save()
+
           league.membersCount = league.membersCount.minus(BigInt.fromI32(1))
           league.save()
-          member.save()
         }
         if (memberLeagues.length === 0) store.remove('Member', member.id)
       }
