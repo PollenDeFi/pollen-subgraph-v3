@@ -94,7 +94,7 @@ dataSources:
           handler: handleJoinedLeague
         - event: LeftLeague(indexed address,uint256)
           handler: handleLeftLeague
-        - event: TrasnferAdminRole(indexed address,indexed address,uint256)
+        - event: TransferAdminRole(indexed address,indexed address,uint256)
           handler: handleTransferAdminRole
         - event: MemberRemoved(indexed address,indexed uint256)
           handler: handleMemberRemoved
