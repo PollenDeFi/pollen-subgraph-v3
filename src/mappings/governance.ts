@@ -1,4 +1,4 @@
-import { log, store, Address, BigInt, BigDecimal, Value } from '@graphprotocol/graph-ts'
+import { log, BigInt, Value } from '@graphprotocol/graph-ts'
 import { VOTING_TERMS_ID } from '../utils/constants'
 
 import {
@@ -11,7 +11,7 @@ import {
 
 import { Proposal, VotingTerms } from '../../generated/schema'
 
-export function handleNewProposal(event: NewProposal) {
+export function handleNewProposal(event: NewProposal): void {
   let id = event.params.id.toHexString()
   let submitter = event.params.submitter.toHexString()
   let executer = event.params.executer.toHexString()
@@ -29,7 +29,7 @@ export function handleNewProposal(event: NewProposal) {
   log.info('New proposal {} {} {}', [id, submitter, executer])
 }
 
-export function handleVoted(event: Voted) {
+export function handleVoted(event: Voted): void {
   let voter = event.params.voter.toHexString()
   let proposalId = event.params.proposalId.toHexString()
   let voteType = event.params.vote ? 'yes' : 'no'
@@ -47,17 +47,17 @@ export function handleVoted(event: Voted) {
   }
 }
 
-export function handleVotingPeriodChanged(event: VotingPeriodChanged) {
+export function handleVotingPeriodChanged(event: VotingPeriodChanged): void {
   let newVotingPeriod = event.params.newVotingPeriod
   updateTerms('period', newVotingPeriod)
 }
 
-export function handleQuorumChanged(event: QuorumChanged) {
+export function handleQuorumChanged(event: QuorumChanged): void {
   let newQuorum = event.params.newQuorum
   updateTerms('quorum', newQuorum)
 }
 
-export function handleTimeLockChanged(event: TimeLockChanged) {
+export function handleTimeLockChanged(event: TimeLockChanged): void {
   let newTimeLock = event.params.newTimeLock
   updateTerms('quorum', newTimeLock)
 }

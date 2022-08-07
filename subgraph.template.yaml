@@ -119,7 +119,7 @@ dataSources:
       eventHandlers:
         - event: NewProposal(indexed address,address,uint256)
           handler: handleNewProposal
-        - event: Voted(indexed address,address,uint256)
+        - event: Voted(indexed address,uint256,bool,uint256)
           handler: handleVoted
         - event: ClaimedTokens(indexed address,uint256,uint256)
           handler: handleClaimedTokens
