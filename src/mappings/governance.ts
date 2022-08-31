@@ -9,7 +9,7 @@ import {
   Voted,
 } from '../../generated/Governance/Governance'
 
-import { Proposal, VotingTerms } from '../../generated/schema'
+import { Proposal, VotingTerm } from '../../generated/schema'
 
 export function handleNewProposal(event: NewProposal): void {
   let id = event.params.id.toHexString()
@@ -59,23 +59,21 @@ export function handleQuorumChanged(event: QuorumChanged): void {
 
 export function handleTimeLockChanged(event: TimeLockChanged): void {
   let newTimeLock = event.params.newTimeLock
-  updateTerms('quorum', newTimeLock)
+  updateTerms('timelock', newTimeLock)
 }
 
 function updateTerms(term: string, value: BigInt): void {
-  let terms = VotingTerms.load(VOTING_TERMS_ID)
+  let terms = VotingTerm.load(VOTING_TERMS_ID)
 
-  if (terms) {
-    terms.set(term, Value.fromBigInt(value))
-  } else {
-    terms = new VotingTerms(VOTING_TERMS_ID)
+  if (terms == null) {
+    terms = new VotingTerm(VOTING_TERMS_ID)
 
     terms.quorum = BigInt.zero()
     terms.timelock = BigInt.zero()
     terms.period = BigInt.zero()
-
-    terms.set(term, Value.fromBigInt(value))
   }
+
+  terms.set(term, Value.fromBigInt(value))
   terms.save()
 
   log.info('Voting term changed {}: {}', [term, value.toString()])

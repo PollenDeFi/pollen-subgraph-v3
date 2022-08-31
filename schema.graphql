@@ -230,7 +230,7 @@ type Proposal @entity {
   no: BigInt!
 }
 
-type VotingTerms @entity {
+type VotingTerm @entity {
   id: ID!
   period: BigInt!
   quorum: BigInt!
