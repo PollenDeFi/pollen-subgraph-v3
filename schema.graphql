@@ -30,7 +30,6 @@ type PortfolioAllocation @entity {
   asset: Asset!
   amount: BigInt!
   weight: BigInt!
-  isShort: Boolean!
   initialUsdPrice: BigInt!
 }
 
