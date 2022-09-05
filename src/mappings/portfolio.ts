@@ -338,6 +338,7 @@ function mapAllocations(
   entryId: string,
   assets: Address[],
   weights: BigInt[],
+  shorts: bool[],
   amounts: BigInt[],
   quoterContract: Quoter
 ): string[] {
@@ -350,10 +351,13 @@ function mapAllocations(
         let allocation = new PortfolioAllocation(asset.id + '-' + entryId)
 
         let price = quoterContract.quotePrice(0, Address.fromString(asset.id))
+        // dance around bool -> Bool typecasting...
+        let shortInt = shorts[i] ? BigInt.fromI32(1) : BigInt.fromI32(0)
 
         allocation.initialUsdPrice = price.value0
         allocation.asset = asset.id
         allocation.weight = weights[i]
+        allocation.isShort = shortInt.equals(BigInt.fromI32(1))
         allocation.amount = amounts[i]
         allocation.save()
 
@@ -413,8 +417,8 @@ function createPortfolioEntry(
     return null
   } else {
     let entry = new PortfolioEntry(creator.toHexString() + '-' + timestamp.toHexString())
-
     let benchmarkValue = contract.try_getBenchMarkValue()
+
     if (benchmarkValue.reverted) {
       log.error('Failed to get benchmark value', [])
       entry.benchmarkValue = BigInt.zero()
@@ -427,8 +431,16 @@ function createPortfolioEntry(
     entry.vePlnStake = vePlnStake
 
     let assetAmounts = storedPortfolio.value.value0
+    let shorts = storedPortfolio.value.value7
+    let shortsValue = storedPortfolio.value.value6
+
     let assets = contract.getAssets()
-    entry.initialValue = getPortfolioValue(contractAddress, assetAmounts)
+    entry.initialValue = getPortfolioValue(
+      contractAddress,
+      assetAmounts,
+      shorts,
+      shortsValue
+    )
 
     let quoterContract = Quoter.bind(contractAddress)
 
@@ -436,6 +448,7 @@ function createPortfolioEntry(
       entry.id,
       assets,
       weights,
+      shorts,
       assetAmounts,
       quoterContract
     )
@@ -522,13 +535,20 @@ function createPortfolio(
 
 function getPortfolioValue(
   portfolioContractAddr: Address,
-  assetAmounts: BigInt[]
+  assetAmounts: BigInt[],
+  shorts: boolean[],
+  shortsValue: BigInt
 ): BigInt {
   let contract = PortfolioContract.bind(portfolioContractAddr)
 
   let assets = contract.getAssets()
   let prices = contract.getPrices(assetAmounts, assets)
-  let portfolioValue = contract.try_getPortfolioValue(assetAmounts, prices)
+  let portfolioValue = contract.try_getPortfolioValue(
+    assetAmounts,
+    prices,
+    shorts,
+    shortsValue
+  )
   if (portfolioValue.reverted) {
     log.error('Failed to calculate portfolio value', [])
     return BigInt.zero()

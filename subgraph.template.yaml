@@ -94,7 +94,38 @@ dataSources:
           handler: handleJoinedLeague
         - event: LeftLeague(indexed address,uint256)
           handler: handleLeftLeague
-        - event: TrasnferAdminRole(indexed address,indexed address,uint256)
+        - event: TransferAdminRole(indexed address,indexed address,uint256)
           handler: handleTransferAdminRole
         - event: MemberRemoved(indexed address,indexed uint256)
           handler: handleMemberRemoved
+
+  - kind: ethereum/contract
+    name: Governance
+    network: {{ network }}
+    source:
+      address: '{{ pollenDAO }}'
+      abi: Governance
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mappings/governance.ts
+      entities:
+        - Proposal
+      abis:
+        - name: Governance
+          file: ./abis/Governance.json
+      eventHandlers:
+        - event: NewProposal(indexed address,address,uint256)
+          handler: handleNewProposal
+        - event: Voted(indexed address,uint256,bool,uint256)
+          handler: handleVoted
+        - event: ClaimedTokens(indexed address,uint256,uint256)
+          handler: handleClaimedTokens
+        - event: QuorumChanged(uint256)
+          handler: handleQuorumChanged
+        - event: TimeLockChanged(uint256)
+          handler: handleTimeLockChanged
+        - event: VotingPeriodChanged(uint256)
+          handler: handleVotingPeriodChanged

@@ -212,6 +212,32 @@
       {
         "indexed": false,
         "internalType": "uint256",
+        "name": "rebalanceFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "RebalanceFeeSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "rebalanceFeeVault",
+        "type": "address"
+      }
+    ],
+    "name": "RebalanceFeeVaultSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
         "name": "rebalanceMinPeriod",
         "type": "uint256"
       }
@@ -269,6 +295,11 @@
         "internalType": "uint256[]",
         "name": "weights",
         "type": "uint256[]"
+      },
+      {
+        "internalType": "bool[]",
+        "name": "isShort",
+        "type": "bool[]"
       },
       {
         "internalType": "bool",
@@ -374,6 +405,16 @@
         "internalType": "uint256",
         "name": "benchMarkRef",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "shortsValue",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool[]",
+        "name": "isShort",
+        "type": "bool[]"
       }
     ],
     "stateMutability": "view",
@@ -390,6 +431,16 @@
         "internalType": "uint256[]",
         "name": "prices",
         "type": "uint256[]"
+      },
+      {
+        "internalType": "bool[]",
+        "name": "isShort",
+        "type": "bool[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "shortsValue",
+        "type": "uint256"
       }
     ],
     "name": "getPortfolioValue",
@@ -510,6 +561,11 @@
         "type": "uint256[]"
       },
       {
+        "internalType": "bool[]",
+        "name": "isShort",
+        "type": "bool[]"
+      },
+      {
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
@@ -565,6 +621,32 @@
       }
     ],
     "name": "setMaxNumberOfAssetsPerPortfolio",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "rebalanceFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "setRebalanceFee",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "rebalanceFeeVault",
+        "type": "address"
+      }
+    ],
+    "name": "setRebalanceFeeVault",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
