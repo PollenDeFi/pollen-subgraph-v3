@@ -385,8 +385,12 @@ function updateUserStatsAfterRebalance(
 
     userStat.reputation = userStat.reputation.plus(repIncrease)
   } else {
+    let percent = BigDecimal.zero()
     let dif = portfolioEntry.initialValue.minus(portfolioEntry.closingValue!)
-    let percent = dif.toBigDecimal().div(portfolioEntry.initialValue.toBigDecimal())
+
+    if (!dif.isZero()) {
+      percent = dif.toBigDecimal().div(portfolioEntry.initialValue.toBigDecimal())
+    }
 
     let repDecrease = userStat.reputation.times(percent)
     userStat.reputation = userStat.reputation.minus(repDecrease)
