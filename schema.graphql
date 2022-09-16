@@ -236,3 +236,8 @@ type VotingTerm @entity {
   quorum: BigInt!
   timelock: BigInt!
 }
+
+type Voter @entity {
+  id: ID!
+  proposals: [Proposal!]!
+}
