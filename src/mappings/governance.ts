@@ -9,7 +9,7 @@ import {
   Voted,
 } from '../../generated/Governance/Governance'
 
-import { Proposal, VotingTerm } from '../../generated/schema'
+import { Proposal, VotingTerm, Voter } from '../../generated/schema'
 
 export function handleNewProposal(event: NewProposal): void {
   let id = event.params.id.toHexString()
@@ -30,20 +30,31 @@ export function handleNewProposal(event: NewProposal): void {
 }
 
 export function handleVoted(event: Voted): void {
-  let voter = event.params.voter.toHexString()
+  let voterId = event.params.voter.toHexString()
   let proposalId = event.params.proposalId.toHexString()
   let voteType = event.params.vote ? 'yes' : 'no'
   let amount = event.params.amount
 
   let proposal = Proposal.load(proposalId)
+  let voter = Voter.load(voterId)
 
   if (proposal) {
     if (voteType === 'yes') proposal.yes = proposal.yes.plus(amount)
     if (voteType === 'no') proposal.no = proposal.no.plus(amount)
 
+    if (voter) {
+      let newProposals = voter.proposals
+      newProposals.push(proposalId)
+      voter.proposals = newProposals
+    } else {
+      voter = new Voter(voterId)
+      voter.proposals = [proposalId]
+    }
+
     proposal.save()
+    voter.save()
   } else {
-    log.error('No proposal found {}, voter: {}', [proposalId, voter])
+    log.error('No proposal found {}, voter: {}', [proposalId, voterId])
   }
 }
 
