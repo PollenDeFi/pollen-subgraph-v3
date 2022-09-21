@@ -1,13 +1,12 @@
 import { log, store, Address, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
 
-// TODO: fix "Trasnfer" typo in .sol
 import {
   NewLeague,
   Invited,
   JoinedLeague,
   LeftLeague,
   MemberRemoved,
-  TrasnferAdminRole,
+  TransferAdminRole,
 } from '../../generated/Leagues/Leagues'
 
 import { League, Member, Invitation } from '../../generated/schema'
@@ -73,7 +72,7 @@ export function handleLeftLeague(event: LeftLeague): void {
   removeMembership(event.params.user, event.params.leagueId)
 }
 
-export function handleTransferAdminRole(event: TrasnferAdminRole): void {
+export function handleTransferAdminRole(event: TransferAdminRole): void {
   let newAdmin = event.params.newAdmin.toHexString()
   let leagueId = event.params.leagueId.toHexString()
   let league = League.load(leagueId)

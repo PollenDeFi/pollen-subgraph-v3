@@ -1,5 +1,6 @@
 {
   "network": "avalanche",
   "pollenDAO": "0x8B312F4503790CBd1030b97C545c7F3eFDaDE717",
+  "leagues": "0x0000000000000000000000000000000000000000",
   "startBlock": "15663636"
 }

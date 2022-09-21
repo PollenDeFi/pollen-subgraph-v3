@@ -802,6 +802,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getBoostingScale",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint8",
@@ -976,6 +989,30 @@
       {
         "internalType": "uint256",
         "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "currentValue",
+        "type": "uint256"
+      }
+    ],
+    "name": "getRewardRate",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "rate",
         "type": "uint256"
       }
     ],
@@ -1378,6 +1415,19 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "_newBoostingScale",
+        "type": "uint256"
+      }
+    ],
+    "name": "setBoostingScale",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "minBalancePollinator",
         "type": "uint256"
       },
@@ -1510,29 +1560,6 @@
       }
     ],
     "name": "transferAdminRole",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "tokenAddr",
-        "type": "address"
-      }
-    ],
-    "name": "transferFunds",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

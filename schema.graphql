@@ -218,3 +218,25 @@ type Invitation @entity {
   user: String!
   league: League!
 }
+
+"---Governance entities---"
+type Proposal @entity {
+  id: ID!
+  submitter: String!
+  executer: String!
+  timestamp: BigInt!
+  yes: BigInt!
+  no: BigInt!
+}
+
+type VotingTerm @entity {
+  id: ID!
+  period: BigInt!
+  quorum: BigInt!
+  timelock: BigInt!
+}
+
+type Voter @entity {
+  id: ID!
+  proposals: [Proposal!]!
+}

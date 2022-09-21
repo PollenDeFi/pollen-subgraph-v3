@@ -13,3 +13,4 @@ export let ONE_BD = BigDecimal.fromString('1')
 export let BI_18 = BigInt.fromI32(18)
 
 export let USER_OVERVIEW_STATS_ID = '1'
+export let VOTING_TERMS_ID = '1'
