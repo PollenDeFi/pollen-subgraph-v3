@@ -11,6 +11,7 @@ import {
 
 import { League, Member, Invitation } from '../../generated/schema'
 
+// FIXME: get nft price and max supply from event params
 export function handleNewLeague(event: NewLeague): void {
   let id = event.params.id.toHexString()
   let admin = event.params.admin.toHexString()
@@ -18,25 +19,29 @@ export function handleNewLeague(event: NewLeague): void {
   let timestamp = event.block.timestamp
 
   let league = new League(id)
-  let member = Member.load(admin) // you can be member without own league
+  let member = new Member(admin)
+  let contract = Contract.bind(contractAddress)
+  let info = contract.try_leagues(event.params.id)
 
   league.admin = admin
   league.timestamp = timestamp
   league.name = name
+  league.maxSupply = BigInt.zero()
+  league.nftPrice = BigInt.zero()
   league.membersCount = BigInt.fromI32(1)
   league.totalPlnStaked = BigDecimal.zero()
   league.totalVePlnStaked = BigDecimal.zero()
   league.rewardsOrPenaltiesPln = BigDecimal.zero()
   league.rewardsOrPenaltiesVePln = BigDecimal.zero()
 
-  if (member) {
-    let newLeagues = member.leagues
-    newLeagues.push(league.id)
-    member.leagues = newLeagues
+  if (info.reverted) {
+    log.error('Failed to fetch league info {}', [id])
   } else {
-    member = new Member(admin)
-    member.leagues = [league.id]
+    league.nftPrice = info.value.value3
+    league.maxSupply = info.value.value4
   }
+
+  member.leagues = [league.id]
 
   league.save()
   member.save()
