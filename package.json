@@ -10,13 +10,14 @@
     "prepare:avalanche": "mustache config/avalanche.json subgraph.template.yaml > subgraph.yaml",
     "prepare:local": "mustache config/localhost.json subgraph.template.yaml > subgraph.yaml",
     "prepare:fuji": "mustache config/fuji.json subgraph.template.yaml > subgraph.yaml",
-    "deploy:rinkeby": "graph deploy --node https://api.thegraph.com/deploy/ PollenDeFi/pollen-v3-rinkeby",
-    "deploy:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ PollenDeFi/pollen-v3",
-    "deploy:fuji": "graph deploy --node https://api.thegraph.com/deploy/ PollenDeFi/pollen-v3-fuji",
-    "deploy:staging:fuji": "graph deploy --node https://api.thegraph.com/deploy/ PollenDeFi/pollen-v3-fuji-staging",
-    "create-local": "graph create --node http://localhost:8020/ PollenDeFi/pollen-subgraph-v3",
-    "remove-local": "graph remove --node http://localhost:8020/ PollenDeFi/pollen-subgraph-v3",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 PollenDeFi/pollen-subgraph-v3"
+    "deploy:rinkeby": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-rinkeby",
+    "deploy:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3",
+    "deploy:fuji": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-fuji",
+    "deploy:staging:fuji": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-fuji-staging",
+    "deploy:experimental:fuji": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-fuji-experimental",
+    "create-local": "graph create --node http://localhost:8020/ pollendefi/pollen-subgraph-v3",
+    "remove-local": "graph remove --node http://localhost:8020/ pollendefi/pollen-subgraph-v3",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 pollendefi/pollen-subgraph-v3"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "^0.26.1",

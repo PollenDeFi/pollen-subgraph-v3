@@ -7,6 +7,7 @@ import {
   LeftLeague,
   MemberRemoved,
   TransferAdminRole,
+  Leagues as Contract,
 } from '../../generated/Leagues/Leagues'
 
 import { League, Member, Invitation } from '../../generated/schema'
@@ -16,9 +17,23 @@ export function handleNewLeague(event: NewLeague): void {
   let admin = event.params.admin.toHexString()
   let name = event.params.name
   let timestamp = event.block.timestamp
+  let contractAddress = event.address
 
   let league = new League(id)
   let member = new Member(admin)
+  let contract = Contract.bind(contractAddress)
+  let info = contract.try_leagues(event.params.id)
+
+  // TODO: add to create event
+  let maxSupply = BigDecimal.zero()
+  let nftPrice = BigDecimal.zero()
+
+  if (info.reverted) {
+    log.error('Failed to fetch league info {}', [id])
+  } else {
+    // FIXME fix this, IDK why no value4
+    // maxSupply = info.value.value4
+  }
 
   league.admin = admin
   league.timestamp = timestamp
