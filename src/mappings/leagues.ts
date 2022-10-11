@@ -71,7 +71,6 @@ export function handleJoinedLeague(event: JoinedLeague): void {
     league.membersCount = league.membersCount.plus(BigInt.fromI32(1))
     league.save()
 
-    store.remove('Invitation', user.concat(leagueId))
     log.info('Joined league {} - {}, user: {}', [league.id, league.name, user])
   } else {
     log.error('Failed to join league', [])
