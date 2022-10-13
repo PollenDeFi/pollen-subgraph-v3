@@ -225,8 +225,8 @@ type Proposal @entity {
   submitter: String!
   executer: String!
   timestamp: BigInt!
-  yes: BigInt!
-  no: BigInt!
+  yes: BigDecimal!
+  no: BigDecimal!
 }
 
 type VotingTerm @entity {

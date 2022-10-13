@@ -1,4 +1,4 @@
-import { log, BigInt, Value } from '@graphprotocol/graph-ts'
+import { log, BigInt, Value, BigDecimal } from '@graphprotocol/graph-ts'
 import { VOTING_TERMS_ID } from '../utils/constants'
 
 import {
@@ -21,8 +21,8 @@ export function handleNewProposal(event: NewProposal): void {
   proposal.submitter = submitter
   proposal.executer = executer
   proposal.timestamp = timestamp
-  proposal.yes = BigInt.zero()
-  proposal.no = BigInt.zero()
+  proposal.yes = BigDecimal.zero()
+  proposal.no = BigDecimal.zero()
 
   proposal.save()
 
@@ -33,7 +33,7 @@ export function handleVoted(event: Voted): void {
   let voterId = event.params.voter.toHexString()
   let proposalId = event.params.proposalId.toHexString()
   let voteType = event.params.vote ? 'yes' : 'no'
-  let amount = event.params.amount
+  let amount = event.params.amount.toBigDecimal()
 
   let proposal = Proposal.load(proposalId)
   let voter = Voter.load(voterId)
