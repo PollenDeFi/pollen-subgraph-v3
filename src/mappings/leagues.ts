@@ -76,23 +76,25 @@ export function handleTransferAdminRole(event: TransferAdminRole): void {
   let newAdmin = event.params.newAdmin.toHexString()
   let leagueId = event.params.leagueId.toHexString()
   let league = League.load(leagueId)
+  let newMember = Member.load(newAdmin)
+
   if (league) {
-    let newMember = Member.load(newAdmin)
     if (newMember === null) {
       newMember = new Member(newAdmin)
       newMember.leagues = [league.id]
-      newMember.save()
+      league.membersCount = league.membersCount.plus(BigInt.fromI32(1))
     } else {
       let newMemberLeagues = newMember.leagues
       if (newMemberLeagues) {
         if (newMemberLeagues.indexOf(league.id) === -1) {
           newMemberLeagues.push(leagueId)
           newMember.leagues = newMemberLeagues
-          newMember.save()
+          league.membersCount = league.membersCount.plus(BigInt.fromI32(1))
         }
       }
     }
     league.admin = newAdmin
+    newMember.save()
     league.save()
   } else {
     log.error('Failed to transfer admin role', [])
@@ -125,9 +127,11 @@ function removeMembership(user: Address, id: BigInt): void {
         const removedLeague = memberLeagues.indexOf(leagueId)
         if (removedLeague !== -1) {
           memberLeagues.splice(removedLeague, 1)
+          member.leagues = memberLeagues
+          member.save()
+
           league.membersCount = league.membersCount.minus(BigInt.fromI32(1))
           league.save()
-          member.save()
         }
         if (memberLeagues.length === 0) store.remove('Member', member.id)
       }

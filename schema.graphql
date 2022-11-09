@@ -226,8 +226,8 @@ type Proposal @entity {
   submitter: String!
   executer: String!
   timestamp: BigInt!
-  yes: BigInt!
-  no: BigInt!
+  yes: BigDecimal!
+  no: BigDecimal!
 }
 
 type VotingTerm @entity {
@@ -235,4 +235,9 @@ type VotingTerm @entity {
   period: BigInt!
   quorum: BigInt!
   timelock: BigInt!
+}
+
+type Voter @entity {
+  id: ID!
+  proposals: [Proposal!]!
 }
