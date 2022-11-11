@@ -14,6 +14,7 @@
     "deploy:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3",
     "deploy:fuji": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-fuji",
     "deploy:staging:fuji": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-fuji-staging",
+    "deploy:dev:fuji": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-fuji-dev",
     "create-local": "graph create --node http://localhost:8020/ pollendefi/pollen-subgraph-v3",
     "remove-local": "graph remove --node http://localhost:8020/ pollendefi/pollen-subgraph-v3",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 pollendefi/pollen-subgraph-v3"
