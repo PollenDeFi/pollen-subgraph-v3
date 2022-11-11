@@ -1426,7 +1426,7 @@
     ],
     "name": "rebalancePortfolio",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1670,6 +1670,13 @@
       }
     ],
     "name": "updateModule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "updatePortfolioVersion",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
