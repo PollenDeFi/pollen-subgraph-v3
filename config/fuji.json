@@ -1,6 +1,6 @@
 {
   "network": "fuji",
-  "pollenDAO": "0xFB635811ae89F6d2724DE75FD5A6C433B9241ae7",
+  "pollenDAO": "0x9A194C36E886479c96CeBb47fB416c29E32084bA",
   "leagues": "0x0000000000000000000000000000000000000000",
-  "startBlock": "11000000"
+  "startBlock": "15000000"
 }
