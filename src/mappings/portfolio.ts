@@ -353,7 +353,8 @@ function mapAllocations(
 
         let price = quoterContract.quotePrice(0, Address.fromString(asset.id))
         // dance around bool -> Bool typecasting...
-        let shortInt = shorts[i] ? BigInt.fromI32(1) : BigInt.fromI32(0)
+        let hasShorts = shorts.length > 0
+        let shortInt = hasShorts && shorts[i] ? BigInt.fromI32(1) : BigInt.fromI32(0)
 
         allocation.initialUsdPrice = price.value0
         allocation.asset = asset.id
@@ -416,8 +417,8 @@ function createPortfolioEntry(
   useOldPortfolio: bool
 ): PortfolioEntry | null {
   let contract = PortfolioContract.bind(contractAddress)
-  let storedNewPortfolio = contract.try_getPortfolio(creator, creator)
-  let storedOldPortfolio = contract.try_getOldPortfolio(creator, creator)
+  let storedNewPortfolio = contract.try_getPortfolio1(creator, creator, true)
+  let storedOldPortfolio = contract.try_getPortfolio(creator, creator)
 
   if (storedNewPortfolio.reverted && storedOldPortfolio.reverted) {
     log.error('Failed to fetch portfolio {}, {} ', [
@@ -492,8 +493,8 @@ function createPortfolio(
   let userAddr = creator.toHexString()
   let userStat = getOrCreateUserStat(userAddr)
 
-  let storedNewPortfolio = contract.try_getPortfolio(creator, creator)
-  let storedOldPortfolio = contract.try_getOldPortfolio(creator, creator)
+  let storedNewPortfolio = contract.try_getPortfolio1(creator, creator, true)
+  let storedOldPortfolio = contract.try_getPortfolio(creator, creator)
   let useOldPortfolio = false
 
   if (storedNewPortfolio.reverted && storedOldPortfolio.reverted) {

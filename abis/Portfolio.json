@@ -374,7 +374,7 @@
         "type": "address"
       }
     ],
-    "name": "getOldPortfolio",
+    "name": "getPortfolio",
     "outputs": [
       {
         "internalType": "uint256[]",
@@ -421,6 +421,11 @@
         "internalType": "address",
         "name": "delegator",
         "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
       }
     ],
     "name": "getPortfolio",
