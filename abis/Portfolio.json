@@ -485,6 +485,30 @@
         "internalType": "uint256[]",
         "name": "prices",
         "type": "uint256[]"
+      }
+    ],
+    "name": "getPortfolioValue",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "assetAmounts",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "prices",
+        "type": "uint256[]"
       },
       {
         "internalType": "bool[]",

@@ -456,6 +456,7 @@ function createPortfolioEntry(
     }
 
     let assets = contract.getAssets()
+
     entry.initialValue = getPortfolioValue(
       contractAddress,
       assetAmounts,
@@ -574,17 +575,21 @@ function getPortfolioValue(
 
   let assets = contract.getAssets()
   let prices = contract.getPrices(assetAmounts, assets)
-  let portfolioValue = contract.try_getPortfolioValue(
+  let useOldPortfolio = shorts.length === 0 && shortsValue.isZero()
+  let oldPortfolioValue = contract.try_getPortfolioValue(assetAmounts, prices)
+  let newPortfolioValue = contract.try_getPortfolioValue1(
     assetAmounts,
     prices,
     shorts,
     shortsValue
   )
-  if (portfolioValue.reverted) {
+
+  if (oldPortfolioValue.reverted && newPortfolioValue.reverted) {
     log.error('Failed to calculate portfolio value', [])
     return BigInt.zero()
   } else {
-    return portfolioValue.value
+    if (useOldPortfolio) return oldPortfolioValue.value
+    return newPortfolioValue.value
   }
 }
 
