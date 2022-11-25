@@ -134,7 +134,7 @@ dataSources:
     name: LockedPollen
     network: {{ network }}
     source:
-      address: '{{ pollenDAO }}'
+      address: '{{ vePln }}'
       abi: LockedPollen
       startBlock: {{ startBlock }}
     mapping:

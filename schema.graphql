@@ -222,8 +222,8 @@ type Invitation @entity {
 "---Locked Pollen (represented by vePLN)---"
 type LockedPollen @entity {
   id: ID!
-  amount: BigDecimal!
-  votingPower: BigDecimal!
+  amount: BigInt!
+  votingPower: BigInt!
   lockEndTime: BigInt!
 }
 
