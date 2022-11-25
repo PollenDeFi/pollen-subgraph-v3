@@ -14,7 +14,11 @@ export function handleLockCreated(event: LockCreated): void {
   let amount = event.params.amount
   let lockEndTime = event.params.lockEndTime
 
-  let lock = LockedPollen.load(account) || new LockedPollen(account)
+  let lock = LockedPollen.load(account)
+
+  if (!lock) {
+    lock = new LockedPollen(account)
+  }
 
   lock.amount = amount
   lock.lockEndTime = lockEndTime
@@ -60,8 +64,8 @@ export function handleUnlocked(event: UnLocked): void {
   }
 }
 
-function getVotingPower(account: Address, vePlnAddress: Address) {
+function getVotingPower(account: Address, vePlnAddress: Address): BigInt {
   let contract = Contract.bind(vePlnAddress)
   let votingpPower = contract.try_getVotingPower(account)
-  return votingpPower
+  return votingpPower.value
 }
