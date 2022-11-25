@@ -9,7 +9,7 @@ import {
   Voted,
 } from '../../generated/Governance/Governance'
 
-import { Proposal, VotingTerm, Voter } from '../../generated/schema'
+import { Proposal, VotingTerm, Voter, LockedPollen } from '../../generated/schema'
 
 export function handleNewProposal(event: NewProposal): void {
   let id = event.params.id.toHexString()
@@ -37,6 +37,7 @@ export function handleVoted(event: Voted): void {
 
   let proposal = Proposal.load(proposalId)
   let voter = Voter.load(voterId)
+  let lock = LockedPollen.load(voterId)
 
   if (proposal) {
     if (voteType === 'yes') proposal.yes = proposal.yes.plus(amount)
@@ -49,6 +50,10 @@ export function handleVoted(event: Voted): void {
     } else {
       voter = new Voter(voterId)
       voter.proposals = [proposalId]
+    }
+
+    if (lock) {
+      voter.lockedPollen = voterId
     }
 
     proposal.save()
