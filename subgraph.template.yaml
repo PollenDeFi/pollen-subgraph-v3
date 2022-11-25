@@ -129,3 +129,30 @@ dataSources:
           handler: handleTimeLockChanged
         - event: VotingPeriodChanged(uint256)
           handler: handleVotingPeriodChanged
+
+  - kind: ethereum/contract
+    name: LockedPollen
+    network: {{ network }}
+    source:
+      address: '{{ pollenDAO }}'
+      abi: LockedPollen
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mappings/minter.ts
+      entities:
+        - LockedPollen
+      abis:
+        - name: LockedPollen
+          file: ./abis/LockedPollen.json
+      eventHandlers:
+        - event: LockCreated(indexed address,uint256,uint256)
+          handler: handleLockCreated
+        - event: LockIncreased(indexed address,uint256)
+          handler: handleLockIncreased
+        - event: LockExtended(indexed address,uint256)
+          handler: handleLockExtended
+        - event: UnLocked(indexed address,uint256,uint256)
+          handler: handleUnlocked
