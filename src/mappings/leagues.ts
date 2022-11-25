@@ -18,7 +18,7 @@ export function handleNewLeague(event: NewLeague): void {
   let timestamp = event.block.timestamp
 
   let league = new League(id)
-  let member = new Member(admin)
+  let member = Member.load(admin) // you can be member without own league
 
   league.admin = admin
   league.timestamp = timestamp
@@ -29,7 +29,14 @@ export function handleNewLeague(event: NewLeague): void {
   league.rewardsOrPenaltiesPln = BigDecimal.zero()
   league.rewardsOrPenaltiesVePln = BigDecimal.zero()
 
-  member.leagues = [league.id]
+  if (member) {
+    let newLeagues = member.leagues
+    newLeagues.push(league.id)
+    member.leagues = newLeagues
+  } else {
+    member = new Member(admin)
+    member.leagues = [league.id]
+  }
 
   league.save()
   member.save()
