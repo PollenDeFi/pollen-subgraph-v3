@@ -2,5 +2,6 @@
   "network": "avalanche",
   "pollenDAO": "0x8B312F4503790CBd1030b97C545c7F3eFDaDE717",
   "leagues": "0x9aCE15c8b41Dd9a16148B465D78502CD6c7ED88a",
+  "vePln": "0x2eCB6F9dF29163758024d416997764922E4528d4",
   "startBlock": "15663636"
 }

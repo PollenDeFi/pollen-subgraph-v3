@@ -247,5 +247,5 @@ type VotingTerm @entity {
 type Voter @entity {
   id: ID!
   proposals: [Proposal!]!
-  lockedPollen: LockedPollen!
+  lockedPollen: LockedPollen
 }
