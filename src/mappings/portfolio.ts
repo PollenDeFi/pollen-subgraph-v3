@@ -417,7 +417,7 @@ function createPortfolioEntry(
   useOldPortfolio: bool
 ): PortfolioEntry | null {
   let contract = PortfolioContract.bind(contractAddress)
-  let storedNewPortfolio = contract.try_getPortfolio1(creator, creator, true)
+  let storedNewPortfolio = contract.try_getPortfolio1(creator, creator)
   let storedOldPortfolio = contract.try_getPortfolio(creator, creator)
 
   if (storedNewPortfolio.reverted && storedOldPortfolio.reverted) {
@@ -494,7 +494,7 @@ function createPortfolio(
   let userAddr = creator.toHexString()
   let userStat = getOrCreateUserStat(userAddr)
 
-  let storedNewPortfolio = contract.try_getPortfolio1(creator, creator, true)
+  let storedNewPortfolio = contract.try_getPortfolio1(creator, creator)
   let storedOldPortfolio = contract.try_getPortfolio(creator, creator)
   let useOldPortfolio = false
 
