@@ -71,6 +71,25 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
   log.info('Rebalancing Portfolio, {}', [userAddr])
   let existingPortfolio = VirtualPortfolio.load(userAddr)
 
+  let contract = PortfolioContract.bind(event.address)
+  let creator = event.params.creator
+
+  let storedNewPortfolio = contract.try_getPortfolio1(creator, creator)
+  let storedOldPortfolio = contract.try_getPortfolio(creator, creator)
+  let useOldPortfolio = false
+
+  if (storedNewPortfolio.reverted && storedOldPortfolio.reverted) {
+    log.error('Failed to fetch portfolio when rebalanced {}, {}', [
+      creator.toHexString(),
+      event.address.toHexString(),
+    ])
+    return
+  } else {
+    if (storedNewPortfolio.reverted) {
+      useOldPortfolio = true
+    }
+  }
+
   updatePollenatorOverviewStats(
     event.params.amount.toBigDecimal(),
     event.params.creator.toHexString(),
@@ -134,7 +153,7 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
       existingPortfolio.plnStake,
       existingPortfolio.vePlnStake,
       event.block.timestamp,
-      false
+      useOldPortfolio
     )
 
     if (newEntry) {
