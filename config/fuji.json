@@ -1,7 +1,7 @@
 {
   "network": "fuji",
-  "pollenDAO": "0x9f4DaE48bF6ced309cC2e90a89B7FC8592523655",
-  "leagues": "0xfb9c5e11BAeFB2db57bc40cdD632A6772C963A27",
-  "vePln": "0x48e41Ef89276235d9470f6ad801E987370cB448F",
-  "startBlock": "15000000"
+  "pollenDAO": "0x507b8B403d908150e312C0492DfdC20710a6Bfa7",
+  "leagues": "0xa0dc85EBD445ED7A41411eB289a51Ae9e28a5AC5",
+  "vePln": "0x32Bf195573cdB69B2f735f4AD465df0D3D81E4E2",
+  "startBlock": "21000000"
 }
