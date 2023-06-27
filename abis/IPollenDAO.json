@@ -432,6 +432,32 @@
       {
         "indexed": false,
         "internalType": "uint256",
+        "name": "rebalanceFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "RebalanceFeeSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "rebalanceFeeVault",
+        "type": "address"
+      }
+    ],
+    "name": "RebalanceFeeVaultSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
         "name": "rebalanceMinPeriod",
         "type": "uint256"
       }
@@ -729,6 +755,11 @@
         "type": "uint256[]"
       },
       {
+        "internalType": "bool[]",
+        "name": "isShort",
+        "type": "bool[]"
+      },
+      {
         "internalType": "bool",
         "name": "tokenType",
         "type": "bool"
@@ -890,6 +921,70 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "delegator",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "name": "getPortfolio",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "assetAmounts",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balance",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "depositPLN",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "depositVePLN",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isOpen",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "benchMarkRef",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "shortsValue",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool[]",
+        "name": "isShort",
+        "type": "bool[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256[]",
         "name": "assetAmounts",
         "type": "uint256[]"
@@ -898,6 +993,16 @@
         "internalType": "uint256[]",
         "name": "prices",
         "type": "uint256[]"
+      },
+      {
+        "internalType": "bool[]",
+        "name": "isShort",
+        "type": "bool[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "shortsValue",
+        "type": "uint256"
       }
     ],
     "name": "getPortfolioValue",
@@ -1358,6 +1463,11 @@
         "type": "uint256[]"
       },
       {
+        "internalType": "bool[]",
+        "name": "isShort",
+        "type": "bool[]"
+      },
+      {
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
@@ -1503,6 +1613,32 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "rebalanceFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "setRebalanceFee",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "rebalanceFeeVault",
+        "type": "address"
+      }
+    ],
+    "name": "setRebalanceFeeVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "rebalanceMinPeriod",
         "type": "uint256"
       }
@@ -1565,6 +1701,13 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "updateBenchMarkVersion",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -1588,6 +1731,13 @@
       }
     ],
     "name": "updateModule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "updatePortfolioVersion",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

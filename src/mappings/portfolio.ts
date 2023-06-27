@@ -1,4 +1,4 @@
-import { BigInt, Address, log, BigDecimal } from '@graphprotocol/graph-ts'
+import { BigInt, Address, log, BigDecimal, ethereum } from '@graphprotocol/graph-ts'
 
 import {
   Portfolio as PortfolioContract,
@@ -71,6 +71,25 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
   log.info('Rebalancing Portfolio, {}', [userAddr])
   let existingPortfolio = VirtualPortfolio.load(userAddr)
 
+  let contract = PortfolioContract.bind(event.address)
+  let creator = event.params.creator
+
+  let storedNewPortfolio = contract.try_getPortfolio1(creator, creator)
+  let storedOldPortfolio = contract.try_getPortfolio(creator, creator)
+  let useOldPortfolio = false
+
+  if (storedNewPortfolio.reverted && storedOldPortfolio.reverted) {
+    log.error('Failed to fetch portfolio when rebalanced {}, {}', [
+      creator.toHexString(),
+      event.address.toHexString(),
+    ])
+    return
+  } else {
+    if (storedNewPortfolio.reverted) {
+      useOldPortfolio = true
+    }
+  }
+
   updatePollenatorOverviewStats(
     event.params.amount.toBigDecimal(),
     event.params.creator.toHexString(),
@@ -133,7 +152,8 @@ export function handlePortfolioRebalanced(event: PortfolioRebalanced): void {
       event.params.weights,
       existingPortfolio.plnStake,
       existingPortfolio.vePlnStake,
-      event.block.timestamp
+      event.block.timestamp,
+      useOldPortfolio
     )
 
     if (newEntry) {
@@ -338,6 +358,7 @@ function mapAllocations(
   entryId: string,
   assets: Address[],
   weights: BigInt[],
+  shorts: bool[],
   amounts: BigInt[],
   quoterContract: Quoter
 ): string[] {
@@ -350,10 +371,14 @@ function mapAllocations(
         let allocation = new PortfolioAllocation(asset.id + '-' + entryId)
 
         let price = quoterContract.quotePrice(0, Address.fromString(asset.id))
+        // dance around bool -> Bool typecasting...
+        let hasShorts = shorts.length > 0
+        let shortInt = hasShorts && shorts[i] ? BigInt.fromI32(1) : BigInt.fromI32(0)
 
         allocation.initialUsdPrice = price.value0
         allocation.asset = asset.id
         allocation.weight = weights[i]
+        allocation.isShort = shortInt.equals(BigInt.fromI32(1))
         allocation.amount = amounts[i]
         allocation.save()
 
@@ -407,18 +432,23 @@ function createPortfolioEntry(
   weights: BigInt[],
   plnStake: BigInt,
   vePlnStake: BigInt,
-  timestamp: BigInt
+  timestamp: BigInt,
+  useOldPortfolio: bool
 ): PortfolioEntry | null {
   let contract = PortfolioContract.bind(contractAddress)
-  let storedPortfolio = contract.try_getPortfolio(creator, creator)
+  let storedNewPortfolio = contract.try_getPortfolio1(creator, creator)
+  let storedOldPortfolio = contract.try_getPortfolio(creator, creator)
 
-  if (storedPortfolio.reverted) {
-    log.error('Failed to fetch portfolio {}', [creator.toHexString()])
+  if (storedNewPortfolio.reverted && storedOldPortfolio.reverted) {
+    log.error('Failed to fetch portfolio {}, {} ', [
+      creator.toHexString(),
+      weights.toString(),
+    ])
     return null
   } else {
     let entry = new PortfolioEntry(creator.toHexString() + '-' + timestamp.toHexString())
-
     let benchmarkValue = contract.try_getBenchMarkValue()
+
     if (benchmarkValue.reverted) {
       log.error('Failed to get benchmark value', [])
       entry.benchmarkValue = BigInt.zero()
@@ -430,9 +460,28 @@ function createPortfolioEntry(
     entry.plnStake = plnStake
     entry.vePlnStake = vePlnStake
 
-    let assetAmounts = storedPortfolio.value.value0
+    let assetAmounts: BigInt[]
+    let shorts: boolean[]
+    let shortsValue: BigInt
+
+    if (useOldPortfolio) {
+      assetAmounts = storedOldPortfolio.value.value0
+      shorts = []
+      shortsValue = BigInt.zero()
+    } else {
+      assetAmounts = storedNewPortfolio.value.value0
+      shorts = storedNewPortfolio.value.value7
+      shortsValue = storedNewPortfolio.value.value6
+    }
+
     let assets = contract.getAssets()
-    entry.initialValue = getPortfolioValue(contractAddress, assetAmounts)
+
+    entry.initialValue = getPortfolioValue(
+      contractAddress,
+      assetAmounts,
+      shorts,
+      shortsValue
+    )
 
     let quoterContract = Quoter.bind(contractAddress)
 
@@ -440,6 +489,7 @@ function createPortfolioEntry(
       entry.id,
       assets,
       weights,
+      shorts,
       assetAmounts,
       quoterContract
     )
@@ -460,13 +510,22 @@ function createPortfolio(
   isBenchmark: boolean = false
 ): void {
   let contract = PortfolioContract.bind(contractAddress)
-  let storedPortfolio = contract.try_getPortfolio(creator, creator)
   let userAddr = creator.toHexString()
   let userStat = getOrCreateUserStat(userAddr)
 
-  if (storedPortfolio.reverted) {
-    log.error('Failed to fetch portfolio {}', [creator.toHexString()])
+  let storedNewPortfolio = contract.try_getPortfolio1(creator, creator)
+  let storedOldPortfolio = contract.try_getPortfolio(creator, creator)
+  let useOldPortfolio = false
+
+  if (storedNewPortfolio.reverted && storedOldPortfolio.reverted) {
+    log.error('Failed to fetch portfolio when created {}, {}', [
+      creator.toHexString(),
+      contractAddress.toHexString(),
+    ])
   } else {
+    if (storedNewPortfolio.reverted) {
+      useOldPortfolio = true
+    }
     let portfolio = VirtualPortfolio.load(userAddr)
     if (portfolio == null) {
       portfolio = new VirtualPortfolio(userAddr)
@@ -495,7 +554,8 @@ function createPortfolio(
       weights,
       portfolio.vePlnStake,
       portfolio.plnStake,
-      timestamp
+      timestamp,
+      useOldPortfolio
     )
 
     if (entry) {
@@ -526,18 +586,29 @@ function createPortfolio(
 
 function getPortfolioValue(
   portfolioContractAddr: Address,
-  assetAmounts: BigInt[]
+  assetAmounts: BigInt[],
+  shorts: boolean[],
+  shortsValue: BigInt
 ): BigInt {
   let contract = PortfolioContract.bind(portfolioContractAddr)
 
   let assets = contract.getAssets()
   let prices = contract.getPrices(assetAmounts, assets)
-  let portfolioValue = contract.try_getPortfolioValue(assetAmounts, prices)
-  if (portfolioValue.reverted) {
+  let useOldPortfolio = shorts.length === 0 && shortsValue.isZero()
+  let oldPortfolioValue = contract.try_getPortfolioValue(assetAmounts, prices)
+  let newPortfolioValue = contract.try_getPortfolioValue1(
+    assetAmounts,
+    prices,
+    shorts,
+    shortsValue
+  )
+
+  if (oldPortfolioValue.reverted && newPortfolioValue.reverted) {
     log.error('Failed to calculate portfolio value', [])
     return BigInt.zero()
   } else {
-    return portfolioValue.value
+    if (useOldPortfolio) return oldPortfolioValue.value
+    return newPortfolioValue.value
   }
 }
 

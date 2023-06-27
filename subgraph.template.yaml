@@ -25,7 +25,7 @@ dataSources:
         - Portfolio
       abis:
         - name: Portfolio
-          file: ./abis/Portfolio.json
+          file: ./abis/PatchedPortfolio.json
         - name: ERC20
           file: ./abis/ERC20.json
         - name: Quoter

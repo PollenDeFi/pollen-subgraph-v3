@@ -30,6 +30,7 @@ type PortfolioAllocation @entity {
   asset: Asset!
   amount: BigInt!
   weight: BigInt!
+  isShort: Boolean!
   initialUsdPrice: BigInt!
 }
 
@@ -199,6 +200,8 @@ type League @entity {
   id: ID!
   name: String!
   admin: String!
+  nftPrice: BigInt!
+  maxSupply: BigInt!
   timestamp: BigInt!
   members: [Member!]! @derivedFrom(field: "leagues")
   membersCount: BigInt!

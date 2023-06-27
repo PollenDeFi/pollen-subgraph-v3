@@ -12,6 +12,7 @@
     "prepare:fuji": "mustache config/fuji.json subgraph.template.yaml > subgraph.yaml",
     "deploy:rinkeby": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-rinkeby",
     "deploy:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3",
+    "deploy:testing:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-testing",
     "deploy:fuji": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-fuji",
     "deploy:staging:fuji": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-fuji-staging",
     "deploy:dev:fuji": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-fuji-dev",
