@@ -1,4 +1,4 @@
-import { log, BigInt, Value } from '@graphprotocol/graph-ts'
+import { log, BigInt, Value, BigDecimal } from '@graphprotocol/graph-ts'
 import { VOTING_TERMS_ID } from '../utils/constants'
 
 import {
@@ -9,7 +9,7 @@ import {
   Voted,
 } from '../../generated/Governance/Governance'
 
-import { Proposal, VotingTerm, Voter } from '../../generated/schema'
+import { Proposal, VotingTerm, Voter, LockedPollen } from '../../generated/schema'
 
 export function handleNewProposal(event: NewProposal): void {
   let id = event.params.id.toHexString()
@@ -21,8 +21,8 @@ export function handleNewProposal(event: NewProposal): void {
   proposal.submitter = submitter
   proposal.executer = executer
   proposal.timestamp = timestamp
-  proposal.yes = BigInt.zero()
-  proposal.no = BigInt.zero()
+  proposal.yes = BigDecimal.zero()
+  proposal.no = BigDecimal.zero()
 
   proposal.save()
 
@@ -33,10 +33,11 @@ export function handleVoted(event: Voted): void {
   let voterId = event.params.voter.toHexString()
   let proposalId = event.params.proposalId.toHexString()
   let voteType = event.params.vote ? 'yes' : 'no'
-  let amount = event.params.amount
+  let amount = event.params.amount.toBigDecimal()
 
   let proposal = Proposal.load(proposalId)
   let voter = Voter.load(voterId)
+  let lock = LockedPollen.load(voterId)
 
   if (proposal) {
     if (voteType === 'yes') proposal.yes = proposal.yes.plus(amount)
@@ -49,6 +50,10 @@ export function handleVoted(event: Voted): void {
     } else {
       voter = new Voter(voterId)
       voter.proposals = [proposalId]
+    }
+
+    if (lock) {
+      voter.lockedPollen = voterId
     }
 
     proposal.save()

@@ -913,6 +913,60 @@
         "internalType": "uint256",
         "name": "benchMarkRef",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "delegator",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "name": "getPortfolio",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "assetAmounts",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balance",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "depositPLN",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "depositVePLN",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isOpen",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "benchMarkRef",
+        "type": "uint256"
       },
       {
         "internalType": "uint256",
@@ -1426,7 +1480,7 @@
     ],
     "name": "rebalancePortfolio",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1647,6 +1701,13 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "updateBenchMarkVersion",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -1670,6 +1731,13 @@
       }
     ],
     "name": "updateModule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "updatePortfolioVersion",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

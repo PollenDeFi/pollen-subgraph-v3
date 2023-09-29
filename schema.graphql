@@ -222,14 +222,22 @@ type Invitation @entity {
   league: League!
 }
 
+"---Locked Pollen (represented by vePLN)---"
+type LockedPollen @entity {
+  id: ID!
+  amount: BigInt!
+  votingPower: BigInt!
+  lockEndTime: BigInt!
+}
+
 "---Governance entities---"
 type Proposal @entity {
   id: ID!
   submitter: String!
   executer: String!
   timestamp: BigInt!
-  yes: BigInt!
-  no: BigInt!
+  yes: BigDecimal!
+  no: BigDecimal!
 }
 
 type VotingTerm @entity {
@@ -242,4 +250,5 @@ type VotingTerm @entity {
 type Voter @entity {
   id: ID!
   proposals: [Proposal!]!
+  lockedPollen: LockedPollen
 }
