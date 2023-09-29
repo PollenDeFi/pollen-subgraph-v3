@@ -286,6 +286,15 @@ export function handleDelegated(event: Delegated): void {
       if (delegation.plnAmount.isZero() && delegation.vePlnAmount.isZero()) {
         // Starting again after returning to zero
         delegation.startTimestamp = event.block.timestamp
+        if (!delegateeStat.totalDelegators.isZero())
+          delegateeStat.totalDelegators = delegateeStat.totalDelegators.minus(
+            BigInt.fromString('1')
+          )
+
+        if (!delegatorStat.totalDelegators.isZero())
+          delegatorStat.totalDelegators = delegatorStat.totalDelegators.minus(
+            BigInt.fromString('1')
+          )
       }
       delegation.updatedTimestamp = event.block.timestamp
       if (event.params.tokenType) {
