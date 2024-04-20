@@ -121,8 +121,6 @@ dataSources:
           handler: handleNewProposal
         - event: Voted(indexed address,uint256,bool,uint256)
           handler: handleVoted
-        - event: ClaimedTokens(indexed address,uint256,uint256)
-          handler: handleClaimedTokens
         - event: QuorumChanged(uint256)
           handler: handleQuorumChanged
         - event: TimeLockChanged(uint256)
