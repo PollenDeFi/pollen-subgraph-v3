@@ -377,25 +377,29 @@ function mapAllocations(
     if (assets[i]) {
       let asset = Asset.load(assets[i].toHexString())
       if (asset) {
-        let allocation = new PortfolioAllocation(asset.id + '-' + entryId)
+        let price = quoterContract.try_quotePrice(0, Address.fromString(asset.id))
+        if (price.reverted) {
+          log.warning('Quote for {} failed. Allocation skipped.', [asset.id])
+        } else {
+          let allocation = new PortfolioAllocation(asset.id + '-' + entryId)
 
-        let price = quoterContract.quotePrice(0, Address.fromString(asset.id))
-        // dance around bool -> Bool typecasting...
-        let hasShorts = shorts.length > 0
-        let shortInt = hasShorts && shorts[i] ? BigInt.fromI32(1) : BigInt.fromI32(0)
+          // dance around bool -> Bool typecasting...
+          let hasShorts = shorts.length > 0
+          let shortInt = hasShorts && shorts[i] ? BigInt.fromI32(1) : BigInt.fromI32(0)
 
-        allocation.initialUsdPrice = price.value0
-        allocation.asset = asset.id
-        allocation.weight = weights[i]
-        allocation.isShort = shortInt.equals(BigInt.fromI32(1))
-        allocation.amount = amounts[i]
-        allocation.save()
+          allocation.initialUsdPrice = price.value.value0
+          allocation.asset = asset.id
+          allocation.weight = weights[i]
+          allocation.isShort = shortInt.equals(BigInt.fromI32(1))
+          allocation.amount = amounts[i]
+          allocation.save()
 
-        allocations.push(allocation.id)
+          allocations.push(allocation.id)
 
-        if (weights[i]) {
-          asset.totalAllocation = asset.totalAllocation.plus(weights[i])
-          asset.save()
+          if (weights[i]) {
+            asset.totalAllocation = asset.totalAllocation.plus(weights[i])
+            asset.save()
+          }
         }
       }
     }
@@ -644,9 +648,13 @@ function updateAssetProfitLoss(
   let startValue = allocation.initialUsdPrice.times(allocation.amount).toBigDecimal()
 
   let quoterContract = Quoter.bind(contractAddress)
-  let price = quoterContract.quotePrice(0, Address.fromString(allocation.asset))
-  let endValue = price.value0.times(allocation.amount).toBigDecimal()
-  let diff = endValue.minus(startValue)
+  let price = quoterContract.try_quotePrice(0, Address.fromString(allocation.asset))
+  let diff = BigDecimal.zero()
+
+  if (!price.reverted) {
+    let endValue = price.value.value0.times(allocation.amount).toBigDecimal()
+    diff = endValue.minus(startValue)
+  }
 
   assetProfitOrLoss.profitOrLoss.plus(diff)
   assetProfitOrLoss.save()
