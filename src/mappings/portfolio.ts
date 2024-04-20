@@ -387,7 +387,7 @@ function mapAllocations(
           let hasShorts = shorts.length > 0
           let shortInt = hasShorts && shorts[i] ? BigInt.fromI32(1) : BigInt.fromI32(0)
 
-          allocation.initialUsdPrice = price.value0
+          allocation.initialUsdPrice = price.value.value0
           allocation.asset = asset.id
           allocation.weight = weights[i]
           allocation.isShort = shortInt.equals(BigInt.fromI32(1))
@@ -652,7 +652,7 @@ function updateAssetProfitLoss(
   let diff = BigDecimal.zero()
 
   if (!price.reverted) {
-    let endValue = price.value0.times(allocation.amount).toBigDecimal()
+    let endValue = price.value.value0.times(allocation.amount).toBigDecimal()
     diff = endValue.minus(startValue)
   }
 
