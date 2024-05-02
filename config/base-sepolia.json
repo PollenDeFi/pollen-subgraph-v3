@@ -1,0 +1,7 @@
+{
+  "network": "base-sepolia",
+  "pollenDAO": "0xEF789258233E6cFBB5E0bb093FC9537E69e81Bb7",
+  "leagues": "0x55F04Ee2775925b80125F412C05cF5214Fd1317a",
+  "vePln": "0x3a28AB567b661B3edaF9Ef0bDE9489558EDB3995",
+  "startBlock": "9439000"
+}

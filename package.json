@@ -10,6 +10,7 @@
     "prepare:avalanche": "mustache config/avalanche.json subgraph.template.yaml > subgraph.yaml",
     "prepare:local": "mustache config/localhost.json subgraph.template.yaml > subgraph.yaml",
     "prepare:fuji": "mustache config/fuji.json subgraph.template.yaml > subgraph.yaml",
+    "prepare:baseSepolia": "mustache config/base-sepolia.json subgraph.template.yaml > subgraph.yaml",
     "deploy:rinkeby": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-rinkeby",
     "deploy:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3",
     "deploy:testing:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ pollendefi/pollen-v3-testing",
@@ -21,8 +22,8 @@
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 pollendefi/pollen-subgraph-v3"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "^0.26.1",
-    "@graphprotocol/graph-ts": "^0.27.0",
+    "@graphprotocol/graph-cli": "^0.71.0",
+    "@graphprotocol/graph-ts": "^0.35.1",
     "mustache": "^4.2.0"
   }
 }
