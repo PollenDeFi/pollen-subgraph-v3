@@ -21,8 +21,8 @@
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 pollendefi/pollen-subgraph-v3"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "^0.26.1",
-    "@graphprotocol/graph-ts": "^0.27.0",
+    "@graphprotocol/graph-cli": "^0.96.0",
+    "@graphprotocol/graph-ts": "0.32.0",
     "mustache": "^4.2.0"
   }
 }
