@@ -389,9 +389,11 @@ function mapAllocations(
 
           allocation.initialUsdPrice = price.value.value0
           allocation.asset = asset.id
-          allocation.weight = weights[i]
+          if (weights[i])
+            allocation.weight = weights[i]
           allocation.isShort = shortInt.equals(BigInt.fromI32(1))
-          allocation.amount = amounts[i]
+          if (amounts[i])
+            allocation.amount = amounts[i]
           allocation.save()
 
           allocations.push(allocation.id)
