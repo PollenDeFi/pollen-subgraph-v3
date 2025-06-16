@@ -39,6 +39,11 @@ export function handleVoted(event: Voted): void {
   let voter = Voter.load(voterId)
   let lock = LockedPollen.load(voterId)
 
+  if (proposal === null) {
+    log.error('No proposal found {}, voter: {}', [proposalId, voterId])
+    return
+  }
+
   if (proposal) {
     if (voteType === 'yes') proposal.yes = proposal.yes.plus(amount)
     if (voteType === 'no') proposal.no = proposal.no.plus(amount)
