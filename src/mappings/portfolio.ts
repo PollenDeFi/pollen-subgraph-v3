@@ -389,11 +389,9 @@ function mapAllocations(
 
           allocation.initialUsdPrice = price.value.value0
           allocation.asset = asset.id
-          if (weights[i])
-            allocation.weight = weights[i]
+          allocation.weight = weights[i]
           allocation.isShort = shortInt.equals(BigInt.fromI32(1))
-          if (amounts[i])
-            allocation.amount = amounts[i]
+          allocation.amount = amounts[i]
           allocation.save()
 
           allocations.push(allocation.id)
@@ -658,6 +656,6 @@ function updateAssetProfitLoss(
     diff = endValue.minus(startValue)
   }
 
-  assetProfitOrLoss.profitOrLoss.plus(diff)
+  assetProfitOrLoss.profitOrLoss = assetProfitOrLoss.profitOrLoss.plus(diff)
   assetProfitOrLoss.save()
 }
