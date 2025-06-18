@@ -385,7 +385,8 @@ function mapAllocations(
 
           // dance around bool -> Bool typecasting...
           let hasShorts = shorts.length > 0
-          let shortInt = hasShorts && shorts[i] ? BigInt.fromI32(1) : BigInt.fromI32(0)
+          let isShortValue = hasShorts && i < shorts.length && shorts[i]
+          let shortInt = isShortValue ? BigInt.fromI32(1) : BigInt.fromI32(0)
 
           allocation.initialUsdPrice = price.value.value0
           allocation.asset = asset.id
