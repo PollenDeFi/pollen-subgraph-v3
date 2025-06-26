@@ -81,7 +81,10 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/leagues.ts
       entities:
-        - Leagues
+        - League
+        - Member
+        - LeaderboardEntry
+        - MemberPerformance
       abis:
         - name: Leagues
           file: ./abis/Leagues.json

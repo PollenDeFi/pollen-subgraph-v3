@@ -1,6 +1,7 @@
 import { DailyChartItem, Member, OverviewStat, League } from '../../generated/schema'
 import { BigDecimal, BigInt, Value } from '@graphprotocol/graph-ts'
 import { USER_OVERVIEW_STATS_ID } from './constants'
+import { updateMemberPerformance } from '../mappings/leagues'
 
 export function getOrCreateOverviewStats(): OverviewStat {
   let overviewStats = OverviewStat.load(USER_OVERVIEW_STATS_ID)
@@ -176,6 +177,17 @@ export function updateLeagueTotal(
           .plus(amount)
         league.set(stat, Value.fromBigDecimal(newStake))
         league.save()
+        
+        // Update member performance in leaderboard if this is a reward/penalty update
+        if (stat === 'rewardsOrPenaltiesPln' || stat === 'rewardsOrPenaltiesVePln') {
+          updateMemberPerformance(
+            userId, 
+            member.leagues[i], 
+            amount, 
+            stat === 'rewardsOrPenaltiesVePln',
+            BigInt.fromI32(0) // timestamp will be set properly in the calling function
+          )
+        }
       }
     }
   }
