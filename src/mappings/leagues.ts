@@ -10,7 +10,7 @@ import {
   Leagues as Contract,
 } from '../../generated/Leagues/Leagues'
 
-import { League, Member, Invitation } from '../../generated/schema'
+import { League, Member, Invitation, LeaderboardEntry, MemberPerformance } from '../../generated/schema'
 
 // FIXME: get nft price and max supply from event params
 export function handleNewLeague(event: NewLeague): void {
@@ -54,19 +54,11 @@ export function handleNewLeague(event: NewLeague): void {
 export function handleJoinedLeague(event: JoinedLeague): void {
   let user = event.params.user.toHexString()
   let leagueId = event.params.leagueId.toHexString()
-  let member = Member.load(user)
   let league = League.load(leagueId)
 
   if (league) {
-    if (member === null) {
-      member = new Member(user)
-      member.leagues = [league.id]
-    } else {
-      let memberLeagues = member.leagues
-      memberLeagues.push(league.id)
-      member.leagues = memberLeagues
-    }
-    member.save()
+    // Initialize member with leaderboard support
+    initializeMemberInLeague(user, league.id)
 
     league.membersCount = league.membersCount.plus(BigInt.fromI32(1))
     league.save()
@@ -99,7 +91,7 @@ export function handleTransferAdminRole(event: TransferAdminRole): void {
       let newMemberLeagues = newMember.leagues
       if (newMemberLeagues) {
         if (newMemberLeagues.indexOf(league.id) === -1) {
-          newMemberLeagues.push(leagueId)
+          newMemberLeagues.push(league.id)
           newMember.leagues = newMemberLeagues
           newMember.save()
         }
@@ -148,4 +140,92 @@ function removeMembership(user: Address, id: BigInt): void {
   } else {
     log.error('Failed to remove member from league {}', [leagueId])
   }
+}
+
+// New leaderboard management functions
+export function updateMemberPerformance(
+  userId: string, 
+  leagueId: string, 
+  rewardPenalty: BigDecimal,
+  isVePln: boolean,
+  timestamp: BigInt
+): void {
+  let performanceId = userId + '-' + leagueId
+  let performance = MemberPerformance.load(performanceId)
+  
+  if (performance == null) {
+    performance = new MemberPerformance(performanceId)
+    performance.member = userId
+    performance.league = leagueId
+    performance.plnStaked = BigDecimal.zero()
+    performance.vePlnStaked = BigDecimal.zero()
+    performance.rewardsEarned = BigDecimal.zero()
+    performance.penaltiesIncurred = BigDecimal.zero()
+    performance.portfolioValue = BigDecimal.zero()
+    performance.performanceScore = BigDecimal.zero()
+  }
+  
+  if (rewardPenalty.gt(BigDecimal.zero())) {
+    performance.rewardsEarned = performance.rewardsEarned.plus(rewardPenalty)
+  } else {
+    performance.penaltiesIncurred = performance.penaltiesIncurred.plus(rewardPenalty.neg())
+  }
+  
+  // Calculate performance score
+  performance.performanceScore = performance.rewardsEarned.minus(performance.penaltiesIncurred)
+  performance.lastUpdated = timestamp
+  performance.save()
+  
+  // Update leaderboard
+  updateMemberLeaderboardEntry(userId, leagueId, timestamp)
+}
+
+export function updateMemberLeaderboardEntry(
+  userId: string, 
+  leagueId: string, 
+  timestamp: BigInt
+): void {
+  let performanceId = userId + '-' + leagueId
+  let performance = MemberPerformance.load(performanceId)
+  
+  if (performance) {
+    let entryId = leagueId + '-' + userId
+    let entry = LeaderboardEntry.load(entryId)
+    
+    if (entry == null) {
+      entry = new LeaderboardEntry(entryId)
+      entry.league = leagueId
+      entry.member = userId
+      entry.rank = BigInt.zero()
+    }
+    
+    entry.score = performance.performanceScore
+    entry.totalRewards = performance.rewardsEarned
+    entry.totalPenalties = performance.penaltiesIncurred
+    entry.portfolioPerformance = performance.performanceScore
+    entry.timestamp = timestamp
+    entry.save()
+    
+    // Update member stats
+    let member = Member.load(userId)
+    if (member) {
+      member.totalScore = performance.performanceScore
+      member.save()
+    }
+  }
+}
+
+export function initializeMemberInLeague(userId: string, leagueId: string): void {
+  let member = Member.load(userId)
+  if (member == null) {
+    member = new Member(userId)
+    member.leagues = []
+    member.totalScore = BigDecimal.zero()
+    member.rank = BigInt.zero()
+  }
+  
+  let memberLeagues = member.leagues
+  memberLeagues.push(leagueId)
+  member.leagues = memberLeagues
+  member.save()
 }

@@ -209,11 +209,40 @@ type League @entity {
   totalVePlnStaked: BigDecimal!
   rewardsOrPenaltiesPln: BigDecimal!
   rewardsOrPenaltiesVePln: BigDecimal!
+  leaderboard: [LeaderboardEntry!]! @derivedFrom(field: "league")
 }
 
 type Member @entity {
   id: ID!
   leagues: [League!]!
+  performanceStats: [MemberPerformance!]! @derivedFrom(field: "member")
+  totalScore: BigDecimal!
+  rank: BigInt!
+}
+
+type LeaderboardEntry @entity {
+  id: ID!
+  league: League!
+  member: Member!
+  rank: BigInt!
+  score: BigDecimal!
+  totalRewards: BigDecimal!
+  totalPenalties: BigDecimal!
+  portfolioPerformance: BigDecimal!
+  timestamp: BigInt!
+}
+
+type MemberPerformance @entity {
+  id: ID!
+  member: Member!
+  league: League!
+  plnStaked: BigDecimal!
+  vePlnStaked: BigDecimal!
+  rewardsEarned: BigDecimal!
+  penaltiesIncurred: BigDecimal!
+  portfolioValue: BigDecimal!
+  performanceScore: BigDecimal!
+  lastUpdated: BigInt!
 }
 
 type Invitation @entity {
